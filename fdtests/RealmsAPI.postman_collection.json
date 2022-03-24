@@ -1,0 +1,1605 @@
+{
+	"info": {
+		"_postman_id": "10144007-afea-4d12-afee-423d67e3bd4a",
+		"name": "RealmsAPI",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "SetUp",
+			"item": [
+				{
+					"name": "FindAndDeleteExistingTestRealms",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"var arr = jsonData.data.fdRealms.items;\r",
+									"\r",
+									"host = pm.environment.get(\"FLEXDEPLOY_SERVER_HOSTNAME\");\r",
+									"port = pm.environment.get(\"FLEXDEPLOY_SERVER_PORT\");\r",
+									"\r",
+									"for (let i = 0; i < arr.length; i++) {\r",
+									"    var realmObject = arr[i];\r",
+									"    var realmId = realmObject['realmId'];\r",
+									"    var realmClass = realmObject['realmClass'];\r",
+									"\r",
+									"    if(realmClass.includes(\"ActiveDirectory\"))\r",
+									"    {\r",
+									"        if (realmId) {\r",
+									"            pm.sendRequest({\r",
+									"                url: 'http://' + host + ':' + port + '/flexdeploy/rest/v2/graphql',\r",
+									"                method: 'POST',\r",
+									"                header: {\r",
+									"                    'Accept': '*/*',\r",
+									"                    'Content-Type': 'application/json',\r",
+									"                    'Authorization': request.headers[\"authorization\"]\r",
+									"                },\r",
+									"                body: JSON.stringify({\r",
+									"                    query: 'mutation {deleteADRealm(id: ' + realmId + ') }'\r",
+									"                })\r",
+									"            }, function (err, res) {\r",
+									"                console.log(res);\r",
+									"            });\r",
+									"        }\r",
+									"    }\r",
+									"    \r",
+									"    else if(realmClass.includes(\"LDAP\"))\r",
+									"    {\r",
+									"        if (realmId) {\r",
+									"            pm.sendRequest({\r",
+									"                url: 'http://' + host + ':' + port + '/flexdeploy/rest/v2/graphql',\r",
+									"                method: 'POST',\r",
+									"                header: {\r",
+									"                    'Accept': '*/*',\r",
+									"                    'Content-Type': 'application/json',\r",
+									"                    'Authorization': request.headers[\"authorization\"]\r",
+									"                },\r",
+									"                body: JSON.stringify({\r",
+									"                    query: 'mutation {deleteLDAPRealm(id: ' + realmId + ') }'\r",
+									"                })\r",
+									"            }, function (err, res) {\r",
+									"                console.log(res);\r",
+									"            });\r",
+									"        }\r",
+									"    }\r",
+									"\r",
+									"    else if(realmClass.includes(\"Jdbc\"))\r",
+									"    {\r",
+									"        if (realmId) {\r",
+									"            pm.sendRequest({\r",
+									"                url: 'http://' + host + ':' + port + '/flexdeploy/rest/v2/graphql',\r",
+									"                method: 'POST',\r",
+									"                header: {\r",
+									"                    'Accept': '*/*',\r",
+									"                    'Content-Type': 'application/json',\r",
+									"                    'Authorization': request.headers[\"authorization\"]\r",
+									"                },\r",
+									"                body: JSON.stringify({\r",
+									"                    query: 'mutation {deleteLocalRealm(id: ' + realmId + ') }'\r",
+									"                })\r",
+									"            }, function (err, res) {\r",
+									"                console.log(res);\r",
+									"            });\r",
+									"        }\r",
+									"    }\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "welcome1",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{ADMIN_USERNAME}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query fdRealms ($page: PageInput, $sort: [SortInput], $where: [WhereInput]) {\n    fdRealms (page: $page, sort: $sort, where: $where) {\n        hasMore\n        items {\n            ... on ADRealmDataObject {\n                realmId,\n                realmClass\n            }\n            ... on LDAPRealmDataObject {\n                realmId,\n                realmClass\n            }\n            ... on LocalRealmDataObject {\n                realmId,\n                realmClass\n            }\n        }\n        next\n    }\n}",
+								"variables": "{\n  \"where\": {\n    \"field\": \"realmName\",\n    \"type\": \"inc\",\n    \"value\": \"Postman \"\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Tests GraphQL",
+			"item": [
+				{
+					"name": "ActiveDirectoryRealm",
+					"item": [
+						{
+							"name": "createADRealm",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"var jsonData = pm.response.json();\r",
+											"var realmData = jsonData.data.createADRealm;\r",
+											"pm.collectionVariables.set(\"realmId1\", realmData['realmId']);\r",
+											"\r",
+											"pm.test(\"Check realmName is correct\", function () {\r",
+											"    pm.expect(realmData.realmName).to.eql(\"Postman Flexagon AD1\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check realmClass is correct\", function () {\r",
+											"    pm.expect(realmData.realmClass).to.eql(\"flexagon.fd.ui.security.FlexActiveDirectoryRealm\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check realmIndex is correct\", function () {\r",
+											"    pm.expect(realmData.realmIndex).to.eql(2);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check group mapping is correct\", function () {\r",
+											"    pm.expect(realmData.isGroupMappingEnabled).to.be.true;\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check description is correct\", function () {\r",
+											"    pm.expect(realmData.description).to.eql(\"created ADrealm through postman\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check realm versionNumber is 1\", function () {\r",
+											"    pm.expect(realmData.versionNumber).to.eql(1);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check createdBy is correct\", function () {\r",
+											"    pm.expect(realmData.createdBy).to.eql(pm.environment.get(\"ADMIN_USERNAME\"));\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check updatedBy is correct\", function () {\r",
+											"    pm.expect(realmData.updatedBy).to.eql(pm.environment.get(\"ADMIN_USERNAME\"));\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "welcome1",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "{{ADMIN_USERNAME}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "mutation createADRealm ($input: ADRealmDataObjectInput!) {\n    createADRealm (input: $input) {\n        createdBy\n        createdOn\n        description\n        groupSearchBase\n        groupSearchFilter\n        isActive\n        isGroupMappingEnabled\n        realmClass\n        realmId\n        realmIndex\n        realmName\n        systemPassword\n        systemUserName\n        updatedBy\n        updatedOn\n        url\n        userSearchBase\n        userSearchFilter\n        versionNumber\n    }\n}",
+										"variables": "{\n  \"input\": {\n    \"description\": \"created ADrealm through postman\",\n    \"groupSearchBase\": \"CN=PostmanUsers,DC=flexagondev,DC=local\",\n    \"groupSearchFilter\": \"(objectClass=group)\",\n    \"isActive\": true,\n    \"isGroupMappingEnabled\": true,\n    \"realmClass\": \"flexagon.fd.ui.security.FlexActiveDirectoryRealm\",\n    \"realmIndex\": 2,\n    \"realmName\": \"Postman Flexagon AD1\",\n    \"systemPassword\": \"welcome1\",\n    \"systemUserName\": \"CN=administrator,CN=PostmanUsers,DC=flexagondev,DC=local\",\n    \"url\": \"ldap://adcwt01.flexagon:389\",\n    \"userSearchBase\": \"CN=PostmanUsers,DC=flexagondev,DC=local\",\n    \"userSearchFilter\": \"(&(objectClass=*)(sAMAccountName={0}))\",\n    \"versionNumber\": 0\n  }\n}"
+									}
+								},
+								"url": {
+									"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+									"protocol": "http",
+									"host": [
+										"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+									],
+									"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+									"path": [
+										"flexdeploy",
+										"rest",
+										"v2",
+										"graphql"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "GetADRealmById",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "welcome1",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "{{ADMIN_USERNAME}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query fdRealmById ($id: Long!) {\n    fdRealmById (id: $id) {\n        ... on ADRealmDataObject {\n            createdBy\n            createdOn\n            description\n            groupSearchBase\n            groupSearchFilter\n            isActive\n            isGroupMappingEnabled\n            realmClass\n            realmId\n            realmIndex\n            realmName\n            systemPassword\n            systemUserName\n            updatedBy\n            updatedOn\n            url\n            userSearchBase\n            userSearchFilter\n            versionNumber\n        }\n        ... on LDAPRealmDataObject {\n            createdBy\n            createdOn\n            description\n            groupSearchBase\n            groupSearchFilter\n            isActive\n            isGroupMappingEnabled\n            realmClass\n            realmId\n            realmIndex\n            realmName\n            systemPassword\n            systemUserName\n            updatedBy\n            updatedOn\n            url\n            userSearchBase\n            userSearchFilter\n            versionNumber\n        }\n        ... on LocalRealmDataObject {\n            createdBy\n            createdOn\n            description\n            isActive\n            isGroupMappingEnabled\n            realmClass\n            realmId\n            realmIndex\n            realmName\n            updatedBy\n            updatedOn\n            versionNumber\n        }\n    }\n}",
+										"variables": "{\n  \"id\": {{realmId1}}\n}"
+									}
+								},
+								"url": {
+									"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+									"protocol": "http",
+									"host": [
+										"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+									],
+									"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+									"path": [
+										"flexdeploy",
+										"rest",
+										"v2",
+										"graphql"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "updateADRealm",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"var jsonData = pm.response.json();\r",
+											"var realmData = jsonData.data.updateADRealm;\r",
+											"\r",
+											"pm.test(\"Check realmName is correct\", function () {\r",
+											"    pm.expect(realmData.realmName).to.eql(\"Postman Flexagon AD1 updated\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check mappingRole\", function () {\r",
+											"    pm.expect(realmData.isGroupMappingEnabled).to.be.false;\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check description is correct\", function () {\r",
+											"    pm.expect(realmData.description).to.eql(\"updated ADrealm through postman\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check userSearchBase is correct\", function () {\r",
+											"    pm.expect(realmData.userSearchBase).to.eql(\"CN=PostmanUsers1,DC=flexagondev,DC=local\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check userName is correct\", function () {\r",
+											"    pm.expect(realmData.systemUserName).to.eql(\"CN=administrator,CN=PostmanUsers1,DC=flexagondev,DC=local\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check realm versionNumber is 2\", function () {\r",
+											"    pm.expect(realmData.versionNumber).to.eql(2);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check createdBy is correct\", function () {\r",
+											"    pm.expect(realmData.createdBy).to.eql(pm.environment.get(\"ADMIN_USERNAME\"));\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check updatedBy is correct\", function () {\r",
+											"    pm.expect(realmData.updatedBy).to.eql(pm.environment.get(\"ADMIN_USERNAME\"));\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "welcome1",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "{{ADMIN_USERNAME}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "mutation updateADRealm ($id: Long!, $input: ADRealmDataObjectInput!) {\n    updateADRealm (id: $id, input: $input) {\n        createdBy\n        createdOn\n        description\n        groupSearchBase\n        groupSearchFilter\n        isActive\n        isGroupMappingEnabled\n        realmClass\n        realmId\n        realmIndex\n        realmName\n        systemPassword\n        systemUserName\n        updatedBy\n        updatedOn\n        url\n        userSearchBase\n        userSearchFilter\n        versionNumber\n    }\n}",
+										"variables": "{\n  \"id\": {{realmId1}},\n  \"input\": {\n    \"description\": \"updated ADrealm through postman\",\n    \"isGroupMappingEnabled\": false,\n    \"realmName\": \"Postman Flexagon AD1 updated\",\n    \"realmIndex\":3,\n    \"systemUserName\": \"CN=administrator,CN=PostmanUsers1,DC=flexagondev,DC=local\",\n    \"systemPassword\": \"welcome@1\",\n    \"userSearchBase\": \"CN=PostmanUsers1,DC=flexagondev,DC=local\",\n    \"userSearchFilter\": \"(&(objectClass=*)(sAMAccountName={0}))\",\n    \"url\":\"ldap://adcwt01.flexagon:389\"\n  }\n}"
+									}
+								},
+								"url": {
+									"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+									"protocol": "http",
+									"host": [
+										"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+									],
+									"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+									"path": [
+										"flexdeploy",
+										"rest",
+										"v2",
+										"graphql"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "patchADRealm",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"var jsonData = pm.response.json();\r",
+											"pm.test(\"Check realmName changed\", function () {\r",
+											"    pm.expect(jsonData.data.patchADRealm.realmName).to.eql(\"Postman Flexagon AD1 patched\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check realm versionNumber is 3\", function () {\r",
+											"    pm.expect(jsonData.data.patchADRealm.versionNumber).to.eql(3);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "welcome1",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "{{ADMIN_USERNAME}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "mutation patchADRealm ($id: Long!, $input: ADRealmDataObjectPatchInput!) {\n    patchADRealm (id: $id, input: $input) {\n        createdBy\n        createdOn\n        description\n        groupSearchBase\n        groupSearchFilter\n        isActive\n        isGroupMappingEnabled\n        realmClass\n        realmId\n        realmIndex\n        realmName\n        systemPassword\n        systemUserName\n        updatedBy\n        updatedOn\n        url\n        userSearchBase\n        userSearchFilter\n        versionNumber\n    }\n}",
+										"variables": "{\n  \"id\":{{realmId1}},\n  \"input\": {\n    \"realmName\": \"Postman Flexagon AD1 patched\"\n  }\n}"
+									}
+								},
+								"url": {
+									"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+									"protocol": "http",
+									"host": [
+										"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+									],
+									"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+									"path": [
+										"flexdeploy",
+										"rest",
+										"v2",
+										"graphql"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "GetRealmsByCriteria",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"var jsonData = pm.response.json();\r",
+											"pm.test(\"Valid items\", function(){\r",
+											"    const valid = jsonData.data.fdRealms.items.every(item => item.realmName.toLowerCase().includes('postman flexagon ad1'))\r",
+											"    pm.expect(valid).eql(true);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Length <= 5\", function(){\r",
+											"    const length = jsonData.data.fdRealms.items.length\r",
+											"    pm.expect(length).lessThan(6);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "welcome1",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "{{ADMIN_USERNAME}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query fdRealms ($page: PageInput, $sort: [SortInput], $where: [WhereInput]) {\n    fdRealms (page: $page, sort: $sort, where: $where) {\n        hasMore\n        items {\n            ... on ADRealmDataObject {\n                createdBy\n                createdOn\n                description\n                groupSearchBase\n                groupSearchFilter\n                isActive\n                isGroupMappingEnabled\n                realmClass\n                realmId\n                realmIndex\n                realmName\n                systemPassword\n                systemUserName\n                updatedBy\n                updatedOn\n                url\n                userSearchBase\n                userSearchFilter\n                versionNumber\n            }\n            ... on LDAPRealmDataObject {\n                createdBy\n                createdOn\n                description\n                groupSearchBase\n                groupSearchFilter\n                isActive\n                isGroupMappingEnabled\n                realmClass\n                realmId\n                realmIndex\n                realmName\n                systemPassword\n                systemUserName\n                updatedBy\n                updatedOn\n                url\n                userSearchBase\n                userSearchFilter\n                versionNumber\n            }\n            ... on LocalRealmDataObject {\n                createdBy\n                createdOn\n                description\n                isActive\n                isGroupMappingEnabled\n                realmClass\n                realmId\n                realmIndex\n                realmName\n                updatedBy\n                updatedOn\n                versionNumber\n            }\n        }\n        next\n    }\n}",
+										"variables": "{\n  \"page\": {\n    \"limit\": 5,\n    \"offset\": 0\n  },\n  \"where\": [\n      {\n          \"field\": \"realmName\",\n          \"type\": \"inci\",\n          \"value\": \"Postman Flexagon AD1\"\n      }\n  ]\n}"
+									}
+								},
+								"url": {
+									"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+									"protocol": "http",
+									"host": [
+										"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+									],
+									"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+									"path": [
+										"flexdeploy",
+										"rest",
+										"v2",
+										"graphql"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deleteADRealm",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "welcome1",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "{{ADMIN_USERNAME}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "mutation deleteADRealm ($id: Long!) {\n    deleteADRealm (id: $id)\n}",
+										"variables": "{\n  \"id\": {{realmId1}}\n}"
+									}
+								},
+								"url": {
+									"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+									"protocol": "http",
+									"host": [
+										"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+									],
+									"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+									"path": [
+										"flexdeploy",
+										"rest",
+										"v2",
+										"graphql"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "LocalRealm",
+					"item": [
+						{
+							"name": "createLocalRealm",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"var jsonData = pm.response.json();\r",
+											"var realmData = jsonData.data.createLocalRealm;\r",
+											"pm.collectionVariables.set(\"localrealmId1\", realmData['realmId']);\r",
+											"\r",
+											"pm.test(\"Check realmName is correct\", function () {\r",
+											"    pm.expect(realmData.realmName).to.eql(\"Postman FD internal realm\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check realmClass is correct\", function () {\r",
+											"    pm.expect(realmData.realmClass).to.eql(\"flexagon.fd.ui.security.FlexJdbcRealm\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"check groupMapping\", function(){\r",
+											"    pm.expect(realmData.isGroupMappingEnabled).to.be.false;\r",
+											"})\r",
+											"\r",
+											"pm.test(\"Check realmIndex is correct\", function () {\r",
+											"    pm.expect(realmData.realmIndex).to.eql(2);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check description is correct\", function () {\r",
+											"    pm.expect(realmData.description).to.eql(\"postman local realm\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check realm versionNumber is 1\", function () {\r",
+											"    pm.expect(realmData.versionNumber).to.eql(1);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check createdBy is correct\", function () {\r",
+											"    pm.expect(realmData.createdBy).to.eql(pm.environment.get(\"ADMIN_USERNAME\"));\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check updatedBy is correct\", function () {\r",
+											"    pm.expect(realmData.updatedBy).to.eql(pm.environment.get(\"ADMIN_USERNAME\"));\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "welcome1",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "{{ADMIN_USERNAME}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "mutation createLocalRealm ($input: LocalRealmDataObjectInput!) {\n    createLocalRealm (input: $input) {\n        createdBy\n        createdOn\n        description\n        isActive\n        isGroupMappingEnabled\n        realmClass\n        realmId\n        realmIndex\n        realmName\n        updatedBy\n        updatedOn\n        versionNumber\n    }\n}",
+										"variables": "{\n  \"input\": {\n    \"description\": \"postman local realm\",\n    \"isActive\": true,\n    \"isGroupMappingEnabled\": false,\n    \"realmClass\": \"flexagon.fd.ui.security.FlexJdbcRealm\",\n    \"realmIndex\": 2,\n    \"realmName\": \"Postman FD internal realm\",\n    \"versionNumber\": 0\n  }\n}"
+									}
+								},
+								"url": {
+									"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+									"protocol": "http",
+									"host": [
+										"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+									],
+									"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+									"path": [
+										"flexdeploy",
+										"rest",
+										"v2",
+										"graphql"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "GetLocalRealmById",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "welcome1",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "{{ADMIN_USERNAME}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query fdRealmById ($id: Long!) {\n    fdRealmById (id: $id) {\n        ... on ADRealmDataObject {\n            createdBy\n            createdOn\n            description\n            groupSearchBase\n            groupSearchFilter\n            isActive\n            isGroupMappingEnabled\n            realmClass\n            realmId\n            realmIndex\n            realmName\n            systemPassword\n            systemUserName\n            updatedBy\n            updatedOn\n            url\n            userSearchBase\n            userSearchFilter\n            versionNumber\n        }\n        ... on LDAPRealmDataObject {\n            createdBy\n            createdOn\n            description\n            groupSearchBase\n            groupSearchFilter\n            isActive\n            isGroupMappingEnabled\n            realmClass\n            realmId\n            realmIndex\n            realmName\n            systemPassword\n            systemUserName\n            updatedBy\n            updatedOn\n            url\n            userSearchBase\n            userSearchFilter\n            versionNumber\n        }\n        ... on LocalRealmDataObject {\n            createdBy\n            createdOn\n            description\n            isActive\n            isGroupMappingEnabled\n            realmClass\n            realmId\n            realmIndex\n            realmName\n            updatedBy\n            updatedOn\n            versionNumber\n        }\n    }\n}",
+										"variables": "{\n  \"id\": {{localrealmId1}}\n}"
+									}
+								},
+								"url": {
+									"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+									"protocol": "http",
+									"host": [
+										"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+									],
+									"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+									"path": [
+										"flexdeploy",
+										"rest",
+										"v2",
+										"graphql"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "updateLocalRealm",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"var jsonData = pm.response.json();\r",
+											"var realmData = jsonData.data.updateLocalRealm;\r",
+											"\r",
+											"pm.test(\"Check realmName is correct\", function () {\r",
+											"    pm.expect(realmData.realmName).to.eql(\"Postman FD internal realm1\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check mappingRole is correct\", function () {\r",
+											"    pm.expect(realmData.isGroupMappingEnabled).to.be.false;\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check description is correct\", function () {\r",
+											"    pm.expect(realmData.description).to.eql(\"postman local realm updated\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check realm versionNumber is 2\", function () {\r",
+											"    pm.expect(realmData.versionNumber).to.eql(2);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check createdBy is correct\", function () {\r",
+											"    pm.expect(realmData.createdBy).to.eql(pm.environment.get(\"ADMIN_USERNAME\"));\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check updatedBy is correct\", function () {\r",
+											"    pm.expect(realmData.updatedBy).to.eql(pm.environment.get(\"ADMIN_USERNAME\"));\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "welcome1",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "{{ADMIN_USERNAME}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "mutation updateLocalRealm ($id: Long!, $input: LocalRealmDataObjectInput!) {\n    updateLocalRealm (id: $id, input: $input) {\n        createdBy\n        createdOn\n        description\n        isActive\n        isGroupMappingEnabled\n        realmClass\n        realmId\n        realmIndex\n        realmName\n        updatedBy\n        updatedOn\n        versionNumber\n    }\n}",
+										"variables": "{\n  \"id\": {{localrealmId1}},\n  \"input\": {\n    \"description\": \"postman local realm updated\",\n    \"isActive\": false,\n    \"isGroupMappingEnabled\": false,\n    \"realmName\": \"Postman FD internal realm1\",\n    \"realmIndex\":4\n  }\n}"
+									}
+								},
+								"url": {
+									"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+									"protocol": "http",
+									"host": [
+										"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+									],
+									"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+									"path": [
+										"flexdeploy",
+										"rest",
+										"v2",
+										"graphql"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "patchLocalRealm",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"var jsonData = pm.response.json();\r",
+											"pm.test(\"Check realmName changed\", function () {\r",
+											"    pm.expect(jsonData.data.patchLocalRealm.realmName).to.eql(\"postman local realm patched\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check realm versionNumber is 3\", function () {\r",
+											"    pm.expect(jsonData.data.patchLocalRealm.versionNumber).to.eql(3);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "welcome1",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "{{ADMIN_USERNAME}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "mutation patchLocalRealm ($id: Long!, $input: LocalRealmDataObjectPatchInput!) {\n    patchLocalRealm (id: $id, input: $input) {\n        createdBy\n        createdOn\n        description\n        isActive\n        isGroupMappingEnabled\n        realmClass\n        realmId\n        realmIndex\n        realmName\n        updatedBy\n        updatedOn\n        versionNumber\n    }\n}",
+										"variables": "{\n  \"id\": {{localrealmId1}},\n  \"input\": {\n    \"realmName\": \"postman local realm patched\"\n  }\n}"
+									}
+								},
+								"url": {
+									"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+									"protocol": "http",
+									"host": [
+										"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+									],
+									"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+									"path": [
+										"flexdeploy",
+										"rest",
+										"v2",
+										"graphql"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "GetRealmsByCriteria",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"var jsonData = pm.response.json();\r",
+											"pm.test(\"Valid items\", function(){\r",
+											"    const valid = jsonData.data.fdRealms.items.every(item => item.realmName.toLowerCase().includes('postman fd internal realm'))\r",
+											"    pm.expect(valid).eql(true);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Length <= 5\", function(){\r",
+											"    const length = jsonData.data.fdRealms.items.length\r",
+											"    pm.expect(length).lessThan(6);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "welcome1",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "{{ADMIN_USERNAME}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query fdRealms ($page: PageInput, $sort: [SortInput], $where: [WhereInput]) {\n    fdRealms (page: $page, sort: $sort, where: $where) {\n        hasMore\n        items {\n            ... on ADRealmDataObject {\n                createdBy\n                createdOn\n                description\n                groupSearchBase\n                groupSearchFilter\n                isActive\n                isGroupMappingEnabled\n                realmClass\n                realmId\n                realmIndex\n                realmName\n                systemPassword\n                systemUserName\n                updatedBy\n                updatedOn\n                url\n                userSearchBase\n                userSearchFilter\n                versionNumber\n            }\n            ... on LDAPRealmDataObject {\n                createdBy\n                createdOn\n                description\n                groupSearchBase\n                groupSearchFilter\n                isActive\n                isGroupMappingEnabled\n                realmClass\n                realmId\n                realmIndex\n                realmName\n                systemPassword\n                systemUserName\n                updatedBy\n                updatedOn\n                url\n                userSearchBase\n                userSearchFilter\n                versionNumber\n            }\n            ... on LocalRealmDataObject {\n                createdBy\n                createdOn\n                description\n                isActive\n                isGroupMappingEnabled\n                realmClass\n                realmId\n                realmIndex\n                realmName\n                updatedBy\n                updatedOn\n                versionNumber\n            }\n        }\n        next\n    }\n}",
+										"variables": "{\n  \"page\": {\n    \"limit\": 5,\n    \"offset\": 0\n  },\n  \"where\": [\n      {\n          \"field\": \"realmName\",\n          \"type\": \"inci\",\n          \"value\": \"Postman FD internal realm\"\n      }\n  ]\n}"
+									}
+								},
+								"url": {
+									"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+									"protocol": "http",
+									"host": [
+										"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+									],
+									"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+									"path": [
+										"flexdeploy",
+										"rest",
+										"v2",
+										"graphql"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deleteLocalRealm",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "welcome1",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "{{ADMIN_USERNAME}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "mutation deleteLocalRealm ($id: Long!) {\n    deleteLocalRealm (id: $id)\n}",
+										"variables": "{\n  \"id\": {{localrealmId1}}\n}"
+									}
+								},
+								"url": {
+									"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+									"protocol": "http",
+									"host": [
+										"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+									],
+									"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+									"path": [
+										"flexdeploy",
+										"rest",
+										"v2",
+										"graphql"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "LDAPRealm",
+					"item": [
+						{
+							"name": "createLDAPRealm",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"var jsonData = pm.response.json();\r",
+											"var realmData = jsonData.data.createLDAPRealm;\r",
+											"pm.collectionVariables.set(\"LDAPrealmId1\", realmData['realmId']);\r",
+											"\r",
+											"pm.test(\"Check realmName is correct\", function () {\r",
+											"    pm.expect(realmData.realmName).to.eql(\"Postman Flexagon LDAP1\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check realmClass is correct\", function () {\r",
+											"    pm.expect(realmData.realmClass).to.eql(\"flexagon.fd.ui.security.FlexLDAPRealm\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check realmIndex is correct\", function () {\r",
+											"    pm.expect(realmData.realmIndex).to.eql(1);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check GroupMapping\", function () {\r",
+											"    pm.expect(realmData.isGroupMappingEnabled).to.be.true;\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check description is correct\", function () {\r",
+											"    pm.expect(realmData.description).to.eql(\"postman ldap realm created\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check realm versionNumber is 1\", function () {\r",
+											"    pm.expect(realmData.versionNumber).to.eql(1);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check createdBy is correct\", function () {\r",
+											"    pm.expect(realmData.createdBy).to.eql(pm.environment.get(\"ADMIN_USERNAME\"));\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check updatedBy is correct\", function () {\r",
+											"    pm.expect(realmData.updatedBy).to.eql(pm.environment.get(\"ADMIN_USERNAME\"));\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "welcome1",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "{{ADMIN_USERNAME}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "mutation createLDAPRealm ($input: LDAPRealmDataObjectInput!) {\n    createLDAPRealm (input: $input) {\n        createdBy\n        createdOn\n        description\n        groupSearchBase\n        groupSearchFilter\n        isActive\n        isGroupMappingEnabled\n        realmClass\n        realmId\n        realmIndex\n        realmName\n        systemPassword\n        systemUserName\n        updatedBy\n        updatedOn\n        url\n        userSearchBase\n        userSearchFilter\n        versionNumber\n    }\n}",
+										"variables": "{\n  \"input\": {\n    \"description\": \"postman ldap realm created\",\n    \"groupSearchBase\": \"CN=PostmanLDAPUsers,DC=flexagondev,DC=local\",\n    \"groupSearchFilter\": \"(objectClass=group)\",\n    \"isActive\": true,\n    \"isGroupMappingEnabled\": true,\n    \"realmClass\": \"flexagon.fd.ui.security.FlexLDAPRealm\",\n    \"realmIndex\": 1,\n    \"realmName\": \"Postman Flexagon LDAP1\",\n    \"systemPassword\": \"welcome1\",\n    \"systemUserName\": \"CN=administrator,CN=PostmanLDAPUsers,DC=flexagondev,DC=local\",\n    \"url\": \"ldap://adcwt01.flexagon:389\",\n    \"userSearchBase\": \"CN=PostmanLDAPUsers,DC=flexagondev,DC=local\",\n    \"userSearchFilter\": \"(&(objectClass=*)(sAMAccountName={0}))\",\n    \"versionNumber\": 0\n  }\n}"
+									}
+								},
+								"url": {
+									"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+									"protocol": "http",
+									"host": [
+										"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+									],
+									"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+									"path": [
+										"flexdeploy",
+										"rest",
+										"v2",
+										"graphql"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "GetLdapRealmById",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "welcome1",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "{{ADMIN_USERNAME}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query fdRealmById ($id: Long!) {\n    fdRealmById (id: $id) {\n        ... on ADRealmDataObject {\n            createdBy\n            createdOn\n            description\n            groupSearchBase\n            groupSearchFilter\n            isActive\n            isGroupMappingEnabled\n            realmClass\n            realmId\n            realmIndex\n            realmName\n            systemPassword\n            systemUserName\n            updatedBy\n            updatedOn\n            url\n            userSearchBase\n            userSearchFilter\n            versionNumber\n        }\n        ... on LDAPRealmDataObject {\n            createdBy\n            createdOn\n            description\n            groupSearchBase\n            groupSearchFilter\n            isActive\n            isGroupMappingEnabled\n            realmClass\n            realmId\n            realmIndex\n            realmName\n            systemPassword\n            systemUserName\n            updatedBy\n            updatedOn\n            url\n            userSearchBase\n            userSearchFilter\n            versionNumber\n        }\n        ... on LocalRealmDataObject {\n            createdBy\n            createdOn\n            description\n            isActive\n            isGroupMappingEnabled\n            realmClass\n            realmId\n            realmIndex\n            realmName\n            updatedBy\n            updatedOn\n            versionNumber\n        }\n    }\n}",
+										"variables": "{\n  \"id\": {{LDAPrealmId1}}\n}"
+									}
+								},
+								"url": {
+									"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+									"protocol": "http",
+									"host": [
+										"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+									],
+									"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+									"path": [
+										"flexdeploy",
+										"rest",
+										"v2",
+										"graphql"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "updateLDAPRealm",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"var jsonData = pm.response.json();\r",
+											"var realmData = jsonData.data.updateLDAPRealm;\r",
+											"\r",
+											"pm.test(\"Check realmName is correct\", function () {\r",
+											"    pm.expect(realmData.realmName).to.eql(\"Postman Flexagon LDAP1 updated\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check mappingRole is correct\", function () {\r",
+											"    pm.expect(realmData.isGroupMappingEnabled).to.be.true;\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check description is correct\", function () {\r",
+											"    pm.expect(realmData.description).to.eql(\"postman ldap realm updated\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check realm versionNumber is 2\", function () {\r",
+											"    pm.expect(realmData.versionNumber).to.eql(2);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check createdBy is correct\", function () {\r",
+											"    pm.expect(realmData.createdBy).to.eql(pm.environment.get(\"ADMIN_USERNAME\"));\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check updatedBy is correct\", function () {\r",
+											"    pm.expect(realmData.updatedBy).to.eql(pm.environment.get(\"ADMIN_USERNAME\"));\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "welcome1",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "{{ADMIN_USERNAME}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "mutation updateLDAPRealm ($id: Long!, $input: LDAPRealmDataObjectInput!) {\n    updateLDAPRealm (id: $id, input: $input) {\n        createdBy\n        createdOn\n        description\n        groupSearchBase\n        groupSearchFilter\n        isActive\n        isGroupMappingEnabled\n        realmClass\n        realmId\n        realmIndex\n        realmName\n        systemPassword\n        systemUserName\n        updatedBy\n        updatedOn\n        url\n        userSearchBase\n        userSearchFilter\n        versionNumber\n    }\n}",
+										"variables": "{\n  \"id\": {{LDAPrealmId1}},\n  \"input\": {\n    \"description\": \"postman ldap realm updated\",\n    \"groupSearchBase\": \"CN=PostmanLDAPUsers,DC=flexagondev,DC=local\",\n    \"groupSearchFilter\": \"(objectClass=group)\",\n    \"isActive\": true,\n    \"isGroupMappingEnabled\": true,\n    \"realmClass\": \"flexagon.fd.ui.security.FlexLDAPRealm\",\n    \"realmIndex\": 5,\n    \"realmName\": \"Postman Flexagon LDAP1 updated\",\n    \"systemPassword\": \"welcome@1\",\n    \"systemUserName\": \"CN=administrator,CN=PostmanLDAPUsers1,DC=flexagondev,DC=local\",\n    \"url\": \"ldap://adcwt01.flexagon:389\",\n    \"userSearchBase\": \"CN=PostmanLDAPUsers1,DC=flexagondev,DC=local\",\n    \"userSearchFilter\":\"(&(objectClass=*)(sAMAccountName={0}))\"\n  }\n}"
+									}
+								},
+								"url": {
+									"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+									"protocol": "http",
+									"host": [
+										"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+									],
+									"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+									"path": [
+										"flexdeploy",
+										"rest",
+										"v2",
+										"graphql"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "patchLDAPRealm",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"var jsonData = pm.response.json();\r",
+											"pm.test(\"Check realmName changed\", function () {\r",
+											"    pm.expect(jsonData.data.patchLDAPRealm.realmName).to.eql(\"Postman Flexagon LDAP1 patched\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check realm versionNumber is 3\", function () {\r",
+											"    pm.expect(jsonData.data.patchLDAPRealm.versionNumber).to.eql(3);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "welcome1",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "{{ADMIN_USERNAME}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "mutation patchLDAPRealm ($id: Long!, $input: LDAPRealmDataObjectPatchInput!) {\n    patchLDAPRealm (id: $id, input: $input) {\n        createdBy\n        createdOn\n        description\n        groupSearchBase\n        groupSearchFilter\n        isActive\n        isGroupMappingEnabled\n        realmClass\n        realmId\n        realmIndex\n        realmName\n        systemPassword\n        systemUserName\n        updatedBy\n        updatedOn\n        url\n        userSearchBase\n        userSearchFilter\n        versionNumber\n    }\n}",
+										"variables": "{\n  \"id\": {{LDAPrealmId1}},\n  \"input\": {\n    \"realmName\": \"Postman Flexagon LDAP1 patched\"\n  }\n}"
+									}
+								},
+								"url": {
+									"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+									"protocol": "http",
+									"host": [
+										"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+									],
+									"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+									"path": [
+										"flexdeploy",
+										"rest",
+										"v2",
+										"graphql"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "GetRealmsByCriteria",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"var jsonData = pm.response.json();\r",
+											"pm.test(\"Valid items\", function(){\r",
+											"    const valid = jsonData.data.fdRealms.items.every(item => item.realmName.toLowerCase().includes('postman flexagon ldap1'))\r",
+											"    pm.expect(valid).eql(true);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Length <= 5\", function(){\r",
+											"    const length = jsonData.data.fdRealms.items.length\r",
+											"    pm.expect(length).lessThan(6);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "welcome1",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "{{ADMIN_USERNAME}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query fdRealms ($page: PageInput, $sort: [SortInput], $where: [WhereInput]) {\n    fdRealms (page: $page, sort: $sort, where: $where) {\n        hasMore\n        items {\n            ... on ADRealmDataObject {\n                createdBy\n                createdOn\n                description\n                groupSearchBase\n                groupSearchFilter\n                isActive\n                isGroupMappingEnabled\n                realmClass\n                realmId\n                realmIndex\n                realmName\n                systemPassword\n                systemUserName\n                updatedBy\n                updatedOn\n                url\n                userSearchBase\n                userSearchFilter\n                versionNumber\n            }\n            ... on LDAPRealmDataObject {\n                createdBy\n                createdOn\n                description\n                groupSearchBase\n                groupSearchFilter\n                isActive\n                isGroupMappingEnabled\n                realmClass\n                realmId\n                realmIndex\n                realmName\n                systemPassword\n                systemUserName\n                updatedBy\n                updatedOn\n                url\n                userSearchBase\n                userSearchFilter\n                versionNumber\n            }\n            ... on LocalRealmDataObject {\n                createdBy\n                createdOn\n                description\n                isActive\n                isGroupMappingEnabled\n                realmClass\n                realmId\n                realmIndex\n                realmName\n                updatedBy\n                updatedOn\n                versionNumber\n            }\n        }\n        next\n    }\n}",
+										"variables": "{\n  \"page\": {\n    \"limit\": 5,\n    \"offset\": 0\n  },\n  \"where\": [\n      {\n          \"field\": \"realmName\",\n          \"type\": \"inci\",\n          \"value\": \"Postman Flexagon LDAP1\"\n      }\n  ]\n}"
+									}
+								},
+								"url": {
+									"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+									"protocol": "http",
+									"host": [
+										"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+									],
+									"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+									"path": [
+										"flexdeploy",
+										"rest",
+										"v2",
+										"graphql"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deleteLDAPRealm",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "welcome1",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "{{ADMIN_USERNAME}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "mutation deleteLDAPRealm ($id: Long!) {\n    deleteLDAPRealm (id: $id)\n}",
+										"variables": "{\n  \"id\": {{LDAPrealmId1}}\n}"
+									}
+								},
+								"url": {
+									"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+									"protocol": "http",
+									"host": [
+										"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+									],
+									"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+									"path": [
+										"flexdeploy",
+										"rest",
+										"v2",
+										"graphql"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "TearDown",
+			"item": [
+				{
+					"name": "FindAndDeleteExistingTestRealms",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"var arr = jsonData.data.fdRealms.items;\r",
+									"\r",
+									"host = pm.environment.get(\"FLEXDEPLOY_SERVER_HOSTNAME\");\r",
+									"port = pm.environment.get(\"FLEXDEPLOY_SERVER_PORT\");\r",
+									"\r",
+									"for (let i = 0; i < arr.length; i++) {\r",
+									"    var realmObject = arr[i];\r",
+									"    var realmId = realmObject['realmId'];\r",
+									"    var realmClass = realmObject['realmClass'];\r",
+									"    console.log(realmClass);\r",
+									"    console.log(realmClass.includes(\"ActiveDirectory\"));\r",
+									"\r",
+									"    if(realmClass.includes(\"ActiveDirectory\"))\r",
+									"    {\r",
+									"        if (realmId) {\r",
+									"            pm.sendRequest({\r",
+									"                url: 'http://' + host + ':' + port + '/flexdeploy/rest/v2/graphql',\r",
+									"                method: 'POST',\r",
+									"                header: {\r",
+									"                    'Accept': '*/*',\r",
+									"                    'Content-Type': 'application/json',\r",
+									"                    'Authorization': request.headers[\"authorization\"]\r",
+									"                },\r",
+									"                body: JSON.stringify({\r",
+									"                    query: 'mutation {deleteADRealm(id: ' + realmId + ') }'\r",
+									"                })\r",
+									"            }, function (err, res) {\r",
+									"                console.log(res);\r",
+									"            });\r",
+									"        }\r",
+									"    }\r",
+									"    \r",
+									"    else if(realmClass.includes(\"LDAP\"))\r",
+									"    {\r",
+									"        if (realmId) {\r",
+									"            pm.sendRequest({\r",
+									"                url: 'http://' + host + ':' + port + '/flexdeploy/rest/v2/graphql',\r",
+									"                method: 'POST',\r",
+									"                header: {\r",
+									"                    'Accept': '*/*',\r",
+									"                    'Content-Type': 'application/json',\r",
+									"                    'Authorization': request.headers[\"authorization\"]\r",
+									"                },\r",
+									"                body: JSON.stringify({\r",
+									"                    query: 'mutation {deleteLDAPRealm(id: ' + realmId + ') }'\r",
+									"                })\r",
+									"            }, function (err, res) {\r",
+									"                console.log(res);\r",
+									"            });\r",
+									"        }\r",
+									"    }\r",
+									"\r",
+									"    else if(realmClass.includes(\"Jdbc\"))\r",
+									"    {\r",
+									"        if (realmId) {\r",
+									"            pm.sendRequest({\r",
+									"                url: 'http://' + host + ':' + port + '/flexdeploy/rest/v2/graphql',\r",
+									"                method: 'POST',\r",
+									"                header: {\r",
+									"                    'Accept': '*/*',\r",
+									"                    'Content-Type': 'application/json',\r",
+									"                    'Authorization': request.headers[\"authorization\"]\r",
+									"                },\r",
+									"                body: JSON.stringify({\r",
+									"                    query: 'mutation {deleteLocalRealm(id: ' + realmId + ') }'\r",
+									"                })\r",
+									"            }, function (err, res) {\r",
+									"                console.log(res);\r",
+									"            });\r",
+									"        }\r",
+									"    }\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "welcome1",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{ADMIN_USERNAME}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query fdRealms ($page: PageInput, $sort: [SortInput], $where: [WhereInput]) {\n    fdRealms (page: $page, sort: $sort, where: $where) {\n        hasMore\n        items {\n            ... on ADRealmDataObject {\n                realmId\n            }\n            ... on LDAPRealmDataObject {\n                realmId\n            }\n            ... on LocalRealmDataObject {\n                realmId\n            }\n        }\n        next\n    }\n}",
+								"variables": "{\n  \"where\": {\n    \"field\": \"realmName\",\n    \"type\": \"inc\",\n    \"value\": \"POSTMAN \"\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "realmId1",
+			"value": ""
+		},
+		{
+			"key": "localrealmId1",
+			"value": ""
+		},
+		{
+			"key": "LDAPrealmId1",
+			"value": ""
+		}
+	]
+}
