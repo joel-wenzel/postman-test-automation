@@ -1,0 +1,1966 @@
+{
+	"info": {
+		"_postman_id": "16af528a-a51d-4483-a8c0-834c4f943a39",
+		"name": "ReportAPI",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Change History Report",
+			"item": [
+				{
+					"name": "Get All",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"No errors in response body\", function () {\r",
+									"    pm.expect(jsonData.errors).to.eql(undefined);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Items are returned\", function () {\r",
+									"    pm.expect(jsonData.data.fdChangeHistory.items.length).to.gt(0);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Amount of returned changes matches default\", function () {\r",
+									"    let maxAmount = parseInt(pm.collectionVariables.get(\"DEFAULT_LIMIT\"));\r",
+									"    pm.expect(jsonData.data.fdChangeHistory.items.length).to.lte(maxAmount);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query envState($where: [WhereInput], $sort: [SortInput], $page: PageInput) {\r\n    fdChangeHistory(where: $where, sort: $sort, page: $page) {\r\n        next\r\n        hasMore\r\n        items {\r\n            changeId\r\n            changeBy\r\n            changeOn\r\n            changeType\r\n            newValue\r\n            objectId\r\n            objectType\r\n            oldValue\r\n            userName\r\n        }\r\n    }\r\n}\r\n",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Invalid Page",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"No errors in response body\", function () {\r",
+									"    pm.expect(jsonData.errors).to.eql(undefined);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"No results returned\", function () {\r",
+									"    pm.expect(jsonData.data.fdChangeHistory.items.length).to.eql(0);\r",
+									"});\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query envState($page: PageInput, $where: [WhereInput], $sort: [SortInput]) {\r\n    fdChangeHistory(page: $page, where: $where, sort: $sort) {\r\n        next\r\n        hasMore\r\n        items {\r\n            changeId\r\n            changeBy\r\n            changeOn\r\n            changeType\r\n            newValue\r\n            objectId\r\n            objectType\r\n            oldValue\r\n            userName\r\n        }\r\n    }\r\n}\r\n",
+								"variables": "{\r\n    \"page\": {\r\n        \"limit\": 5,\r\n        \"offset\": 11111111\r\n    }\r\n}"
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Password Changes",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"No errors in response body\", function () {\r",
+									"    pm.expect(jsonData.errors).to.eql(undefined);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Items are returned\", function () {\r",
+									"    pm.expect(jsonData.data.fdChangeHistory.items.length).to.gt(0);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Amount of returned changes matches default\", function () {\r",
+									"    let maxAmount = parseInt(pm.collectionVariables.get(\"DEFAULT_LIMIT\"));\r",
+									"    pm.expect(jsonData.data.fdChangeHistory.items.length).to.lte(maxAmount);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check only password changes are returned\", function () {\r",
+									"    pm.expect(jsonData.data.fdChangeHistory.items.length).to.eql(jsonData.data.fdChangeHistory.items.filter(a => a.changeType == 'PASSWORD_CHANGED').length);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query envState($where: [WhereInput], $sort: [SortInput]) {\r\n    fdChangeHistory(where: $where, sort: $sort) {\r\n        next\r\n        hasMore\r\n        items {\r\n            changeId\r\n            changeBy\r\n            changeOn\r\n            changeType\r\n            newValue\r\n            objectId\r\n            objectType\r\n            oldValue\r\n            userName\r\n        }\r\n    }\r\n}\r\n",
+								"variables": "{\r\n    \"where\": [\r\n        {\r\n            \"field\": \"objectType\",\r\n            \"type\": \"eq\",\r\n            \"value\": \"USER\"\r\n        },\r\n        {\r\n            \"field\": \"changeType\",\r\n            \"type\": \"eq\",\r\n            \"value\": \"PASSWORD_CHANGED\"\r\n        }\r\n    ]\r\n}"
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Sort By Change Id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"No errors in response body\", function () {\r",
+									"    pm.expect(jsonData.errors).to.eql(undefined);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Items are returned\", function () {\r",
+									"    pm.expect(jsonData.data.fdChangeHistory.items.length).to.gt(0);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Amount of returned changes matches default\", function () {\r",
+									"    let maxAmount = parseInt(pm.collectionVariables.get(\"DEFAULT_LIMIT\"));\r",
+									"    pm.expect(jsonData.data.fdChangeHistory.items.length).to.lte(maxAmount);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Sorting by object id descending\", function () {\r",
+									"    if (jsonData.data.fdChangeHistory.items.length > 1) {\r",
+									"        return jsonData.data.fdChangeHistory.items[0].changeId > jsonData.data.fdChangeHistory.items[1].changeId;\r",
+									"    }\r",
+									"    return true;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query envState($where: [WhereInput], $sort: [SortInput]) {\r\n    fdChangeHistory(where: $where, sort: $sort) {\r\n        next\r\n        hasMore\r\n        items {\r\n            changeId\r\n            changeBy\r\n            changeOn\r\n            changeType\r\n            newValue\r\n            objectId\r\n            objectType\r\n            oldValue\r\n            userName\r\n        }\r\n    }\r\n}\r\n",
+								"variables": "{\r\n    \"sort\": [\r\n        {\r\n            \"field\": \"changeId\",\r\n            \"direction\": \"desc\"\r\n        }\r\n    ]\r\n}"
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get First Page Multiple Filters and Sort",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"No errors in response body\", function () {\r",
+									"    pm.expect(jsonData.errors).to.eql(undefined);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Items are returned\", function () {\r",
+									"    pm.expect(jsonData.data.fdChangeHistory.items.length).to.gt(0);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Amount of returned changes is less than or equal to limit\", function () {\r",
+									"    pm.expect(jsonData.data.fdChangeHistory.items.length).to.lte(10);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check only inactivated changes are returned\", function () {\r",
+									"    pm.expect(jsonData.data.fdChangeHistory.items.length).to.eql(jsonData.data.fdChangeHistory.items.filter(a => a.changeType == 'GROUP_ADDED').length);\r",
+									"});\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query envState($page: PageInput, $where: [WhereInput], $sort: [SortInput]) {\r\n    fdChangeHistory(page: $page, where: $where, sort: $sort) {    \r\n        next\r\n        hasMore\r\n        items {\r\n            changeBy\r\n            changeOn\r\n            changeType\r\n            newValue\r\n            objectId\r\n            oldValue\r\n            userName\r\n        }\r\n    }\r\n}\r\n",
+								"variables": "{\r\n    \"page\": {\r\n        \"limit\": 10,\r\n        \"offset\": 0\r\n    },\r\n    \"sort\": [\r\n        {\r\n            \"field\": \"changeOn\",\r\n            \"direction\": \"desc\"\r\n        }\r\n    ],\r\n    \"where\": [\r\n        {\r\n            \"field\": \"changeType\",\r\n            \"type\": \"eq\",\r\n            \"value\": \"GROUP_ADDED\"\r\n        }\r\n    ]\r\n}"
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User Report",
+			"item": [
+				{
+					"name": "Get All with Permissions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"No errors in response body\", function () {\r",
+									"    pm.expect(jsonData.errors).to.eql(undefined);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Items are returned\", function () {\r",
+									"    pm.expect(jsonData.data.reportUsers.items.length).to.gt(0);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Amount of returned changes matches default\", function () {\r",
+									"    let maxAmount = parseInt(pm.collectionVariables.get(\"DEFAULT_LIMIT\"));\r",
+									"    pm.expect(jsonData.data.reportUsers.items.length).to.lte(maxAmount);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Admin has all for create snapshot permissions\", function() {\r",
+									"    pm.expect(jsonData.data.reportUsers.items.filter(a => a.userName == \"fdadmin\")[0].createsnapshotPermissions).to.eql(\"All\")\r",
+									"})\r",
+									" \r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query envState($where: [WhereInput], $sort: [SortInput]) {\r\n    reportUsers(where: $where, sort: $sort) {\r\n        next\r\n        hasMore\r\n        items {\r\n            userId\r\n            userName\r\n            firstName\r\n            lastName\r\n            email\r\n            isActive\r\n            createdBy\r\n            createdOn\r\n            updatedBy\r\n            updatedOn\r\n            lastLoginOn\r\n            localUser\r\n            localGroups\r\n            externalGroups\r\n            configprojectlistPermissions\r\n            configurepipelinePermissions\r\n            createsnapshotPermissions\r\n            deletePermissions\r\n            deployPermissions\r\n            executePermissions\r\n            grantpermissionsPermissions\r\n            managelifecyclePermissions\r\n            pageviewPermissions\r\n            readPermissions\r\n            updatePermissions\r\n            uploadPermissions\r\n            viewcontentPermissions\r\n            viewlogsPermissions\r\n        }\r\n    }\r\n}\r\n",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Inactive",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"No errors in response body\", function () {\r",
+									"    pm.expect(jsonData.errors).to.eql(undefined);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Items are returned\", function () {\r",
+									"    pm.expect(jsonData.data.reportUsers.items.length).to.gt(0);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Amount of returned changes matches default\", function () {\r",
+									"    let maxAmount = parseInt(pm.collectionVariables.get(\"DEFAULT_LIMIT\"));\r",
+									"    pm.expect(jsonData.data.reportUsers.items.length).to.lte(maxAmount);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check only active users are returned\", function () {\r",
+									"    pm.expect(jsonData.data.reportUsers.items.length).to.eql(jsonData.data.reportUsers.items.filter(a => a.isActive == 'Y').length);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query envState($page: PageInput, $where: [WhereInput], $sort: [SortInput]) {\r\n    reportUsers(page: $page, where: $where, sort: $sort) {\r\n        next\r\n        hasMore\r\n        items {\r\n            userId\r\n            userName\r\n            firstName\r\n            lastName\r\n            email\r\n            isActive\r\n            createdBy\r\n            createdOn\r\n            updatedBy\r\n            updatedOn\r\n            lastLoginOn\r\n            localUser\r\n            localGroups\r\n            externalGroups\r\n        }\r\n    }\r\n}\r\n",
+								"variables": "{\r\n    \"where\": [\r\n        {\r\n            \"field\": \"isActive\",\r\n            \"type\": \"eq\",\r\n            \"value\": \"Y\"\r\n        }\r\n    ]\r\n}"
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Administrators",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"No errors in response body\", function () {\r",
+									"    pm.expect(jsonData.errors).to.eql(undefined);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Items are returned\", function () {\r",
+									"    pm.expect(jsonData.data.reportUsers.items.length).to.gt(0);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Amount of returned changes matches default\", function () {\r",
+									"    let maxAmount = parseInt(pm.collectionVariables.get(\"DEFAULT_LIMIT\"));\r",
+									"    pm.expect(jsonData.data.reportUsers.items.length).to.lte(maxAmount);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"All returned users are admins\", function() {\r",
+									"    pm.expect(jsonData.data.reportUsers.items.length).to.eql(jsonData.data.reportUsers.items.filter(a => a.localGroups.includes(\"FD Administrators\")).length);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query envState($where: [WhereInput], $sort: [SortInput]) {\r\n    reportUsers(where: $where, sort: $sort) {\r\n        items {\r\n            userId\r\n            userName\r\n            localGroups\r\n        }\r\n    }\r\n}\r\n",
+								"variables": "{\r\n    \"where\": [\r\n        {\r\n            \"field\": \"localGroups\",\r\n            \"type\": \"inc\",\r\n            \"value\": \"FD Administrators\"\r\n        }\r\n    ]\r\n}"
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get 5 Sort By Username",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"No errors in response body\", function () {\r",
+									"    pm.expect(jsonData.errors).to.eql(undefined);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"5 Items are returned\", function () {\r",
+									"    pm.expect(jsonData.data.reportUsers.items.length).to.eql(5);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Sorting by object id descending\", function () {\r",
+									"        return jsonData.data.reportUsers.items[0].userName > jsonData.data.reportUsers.items[1].userName;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query envState($page: PageInput, $where: [WhereInput], $sort: [SortInput]) {\r\n    reportUsers(page: $page, where: $where, sort: $sort) {\r\n        next\r\n        hasMore\r\n        items {\r\n            userName\r\n            firstName\r\n            lastName\r\n            createdBy\r\n            createdOn\r\n        }\r\n    }\r\n}\r\n",
+								"variables": "{\r\n    \"sort\": [\r\n        {\r\n            \"field\": \"userName\",\r\n            \"direction\": \"asc\"\r\n        }\r\n    ],\r\n    \"page\": {\r\n        \"limit\": 5,\r\n        \"offset\": 1\r\n    }\r\n}"
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Test Automation Report",
+			"item": [
+				{
+					"name": "Get All",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"No errors in response body\", function () {\r",
+									"    pm.expect(jsonData.errors).to.eql(undefined);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Items are returned\", function () {\r",
+									"    pm.expect(jsonData.data.reportTestAutomation.items.length).to.gt(0);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Amount of returned changes matches default\", function () {\r",
+									"    let maxAmount = parseInt(pm.collectionVariables.get(\"DEFAULT_LIMIT\"));\r",
+									"    pm.expect(jsonData.data.reportTestAutomation.items.length).to.lte(maxAmount);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query envState($where: [WhereInput], $sort: [SortInput]) {\r\n    reportTestAutomation(where: $where, sort: $sort) {\r\n        next\r\n        hasMore\r\n        items {\r\n            allFilesRequested\r\n            avgRespTime\r\n            endTime\r\n            environmentCode\r\n            environmentId\r\n            environmentName\r\n            failedCount\r\n            folderId\r\n            folderRequestId\r\n            instanceCode\r\n            instanceId\r\n            instanceName\r\n            instanceId\r\n            instanceName\r\n        }\r\n    }\r\n}\r\n",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Failed",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"No errors in response body\", function () {\r",
+									"    pm.expect(jsonData.errors).to.eql(undefined);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Items are returned\", function () {\r",
+									"    pm.expect(jsonData.data.reportTestAutomation.items.length).to.gt(0);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Amount of returned changes matches default\", function () {\r",
+									"    let maxAmount = parseInt(pm.collectionVariables.get(\"DEFAULT_LIMIT\"));\r",
+									"    pm.expect(jsonData.data.reportTestAutomation.items.length).to.lte(maxAmount);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check only failed executions are returned\", function () {\r",
+									"    pm.expect(jsonData.data.reportTestAutomation.items.length).to.eql(jsonData.data.reportTestAutomation.items.filter(a => a.failedCount > 0).length);\r",
+									"});\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query envState($where: [WhereInput], $sort: [SortInput]) {\r\n    reportTestAutomation(where: $where, sort: $sort) {\r\n        items {\r\n            allFilesRequested\r\n            avgRespTime\r\n            endTime\r\n            environmentCode\r\n            environmentId\r\n            environmentName\r\n            failedCount\r\n            folderId\r\n            folderRequestId\r\n            instanceCode\r\n            instanceId\r\n            instanceName\r\n        }\r\n    }\r\n}\r\n",
+								"variables": "{\r\n    \"where\": [\r\n        {\r\n            \"field\": \"failedCount\",\r\n            \"type\": \"gt\",\r\n            \"value\": 0\r\n        }\r\n    ]\r\n}"
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Section Sort by Project",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"No errors in response body\", function () {\r",
+									"    pm.expect(jsonData.errors).to.eql(undefined);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Items are returned\", function () {\r",
+									"    pm.expect(jsonData.data.reportTestAutomation.items.length).to.gt(0);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Amount of returned changes matches default\", function () {\r",
+									"    pm.expect(jsonData.data.reportTestAutomation.items.length).to.lte(20);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Sorting by project name ascending\", function () {\r",
+									"    if (jsonData.data.reportTestAutomation.items.length > 1) {\r",
+									"        return jsonData.data.reportTestAutomation.items[0].projectName <= jsonData.data.reportTestAutomation.items[1].projectName;\r",
+									"    }\r",
+									"    return true;\r",
+									"});\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query envState($where: [WhereInput], $sort: [SortInput], $page: PageInput) {\r\n    reportTestAutomation(where: $where, sort: $sort, page: $page) {\r\n        items {\r\n            allFilesRequested\r\n            avgRespTime\r\n            endTime\r\n            environmentCode\r\n            environmentId\r\n            environmentName\r\n            failedCount\r\n            folderId\r\n            folderRequestId\r\n            instanceCode\r\n            instanceId\r\n            instanceName\r\n            projectName\r\n        }\r\n    }\r\n}\r\n",
+								"variables": "{\r\n    \"sort\": [\r\n        {\r\n            \"field\": \"projectName\",\r\n            \"direction\": \"asc\"\r\n        }\r\n    ],\r\n    \"page\": {\r\n        \"limit\": 20,\r\n        \"offset\": 5\r\n    }\r\n}"
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Approval Tasks Report",
+			"item": [
+				{
+					"name": "Get All",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"No errors in response body\", function () {\r",
+									"    pm.expect(jsonData.errors).to.eql(undefined);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Items are returned\", function () {\r",
+									"    pm.expect(jsonData.data.reportApprovalTasks.items.length).to.gt(0);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Amount of returned changes matches default\", function () {\r",
+									"    let maxAmount = parseInt(pm.collectionVariables.get(\"DEFAULT_LIMIT\"));\r",
+									"    pm.expect(jsonData.data.reportApprovalTasks.items.length).to.lte(maxAmount);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query envState($where: [WhereInput], $sort: [SortInput]) {\r\n    reportApprovalTasks(where: $where, sort: $sort) {\r\n        next\r\n        hasMore\r\n        items {\r\n            actionBy\r\n            actionOn\r\n            allFilesRequested\r\n            buildFlexField1\r\n            buildFlexField2\r\n            buildFlexField3\r\n            buildFlexField4\r\n            buildFlexField5\r\n            buildFlexField6\r\n            buildFlexField7\r\n            buildFlexField8\r\n            buildFlexField9\r\n            buildFlexField10\r\n            createdOn\r\n            environmentId\r\n            environmentName\r\n            externalId\r\n            externalSystemId\r\n            externalSystemName\r\n            externalSystemType\r\n            flexField1\r\n            flexField2\r\n            flexField3\r\n            flexField4\r\n            flexField5\r\n            flexField6\r\n            flexField7\r\n            flexField8\r\n            flexField9\r\n            flexField10\r\n            folderRequestFolderId\r\n            folderRequestId\r\n            folderRequestSubmittedOn\r\n            folderRequestSubmitter\r\n            folderVersionName\r\n            gateName\r\n            groupName\r\n            packageName\r\n            pipelineStageExecId\r\n            pipelineStageGateExecId\r\n            projectId\r\n            projectName\r\n            projectVersionName\r\n            relDefinitionId\r\n            relName\r\n            relSnapshot\r\n            taskId\r\n            taskNotes\r\n            taskStatus\r\n            workflowFolderId\r\n            workflowRequestId\r\n            workflowSubmittedOn\r\n            workflowSubmitter\r\n        }\r\n    }\r\n}\r\n",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Recent Approved Tasks",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"No errors in response body\", function () {\r",
+									"    pm.expect(jsonData.errors).to.eql(undefined);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Amount of returned tasks is 10\", function () {\r",
+									"    pm.expect(jsonData.data.reportApprovalTasks.items.length).to.eql(10);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check only approved tasks are returned\", function () {\r",
+									"    pm.expect(jsonData.data.reportApprovalTasks.items.length).to.eql(jsonData.data.reportApprovalTasks.items.filter(a => a.taskStatus == 'APPROVED').length);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query envState($page: PageInput, $where: [WhereInput], $sort: [SortInput]) {\r\n    reportApprovalTasks(page: $page, where: $where, sort: $sort) {\r\n        items {\r\n            actionBy\r\n            actionOn\r\n            buildFlexField1\r\n            environmentName\r\n            flexField1\r\n            folderRequestId\r\n            gateName\r\n            groupName\r\n            packageName\r\n            projectName\r\n            projectVersionName\r\n            relName\r\n            relSnapshot\r\n            taskNotes\r\n            taskStatus\r\n            workflowFolderId\r\n            workflowRequestId\r\n        }\r\n    }\r\n}",
+								"variables": "{\r\n    \"sort\": [\r\n        {\r\n            \"field\": \"actionOn\",\r\n            \"direction\": \"desc\"\r\n        }\r\n    ],\r\n    \"where\": [\r\n        {\r\n            \"field\": \"taskStatus\",\r\n            \"type\": \"eq\",\r\n            \"value\": \"APPROVED\"\r\n        }\r\n    ],\r\n    \"page\": {\r\n        \"limit\": 10,\r\n        \"offset\": 0\r\n    }\r\n}"
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Sort by Release",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"No errors in response body\", function () {\r",
+									"    pm.expect(jsonData.errors).to.eql(undefined);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Items are returned\", function () {\r",
+									"    pm.expect(jsonData.data.reportApprovalTasks.items.length).to.gt(0);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Amount of returned changes matches default\", function () {\r",
+									"    let maxAmount = parseInt(pm.collectionVariables.get(\"DEFAULT_LIMIT\"));\r",
+									"    pm.expect(jsonData.data.reportApprovalTasks.items.length).to.lte(maxAmount);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Sorting by release name descending\", function () {\r",
+									"    if (jsonData.data.reportApprovalTasks.items.length > 1) {\r",
+									"        return jsonData.data.reportApprovalTasks.items[0].relName <= jsonData.data.reportApprovalTasks.items[1].relName;\r",
+									"    }\r",
+									"    return true;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query envState($where: [WhereInput], $sort: [SortInput]) {\r\n    reportApprovalTasks(where: $where, sort: $sort) {\r\n        items {\r\n            actionBy\r\n            actionOn\r\n            allFilesRequested\r\n            relName\r\n        }\r\n    }\r\n}\r\n",
+								"variables": "{\r\n    \"sort\": [\r\n        {\r\n            \"field\": \"relName\",\r\n            \"direction\": \"asc\"\r\n        }\r\n    ]\r\n}"
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Scheduled Tasks Report",
+			"item": [
+				{
+					"name": "Get All",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"No errors in response body\", function () {\r",
+									"    pm.expect(jsonData.errors).to.eql(undefined);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Items are returned\", function () {\r",
+									"    pm.expect(jsonData.data.reportScheduledTasks.items.length).to.gt(0);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Amount of returned changes matches default\", function () {\r",
+									"    let maxAmount = parseInt(pm.collectionVariables.get(\"DEFAULT_LIMIT\"));\r",
+									"    pm.expect(jsonData.data.reportScheduledTasks.items.length).to.lte(maxAmount);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query envState($where: [WhereInput], $sort: [SortInput]) {\r\n    reportScheduledTasks(where: $where, sort: $sort) {\r\n        next\r\n        hasMore\r\n        items {\r\n            allFilesRequested\r\n            createdOn\r\n            buildFlexField1\r\n            environmentId\r\n            environmentName\r\n            flexField1\r\n            folderRequestFolderId\r\n            folderRequestId\r\n            folderRequestSubmittedOn\r\n            folderRequestSubmitter\r\n            folderVersionName\r\n            gateName\r\n            overrideBy\r\n            overrideOn\r\n            packageName\r\n            pipelineStageExecId\r\n            pipelineStageGateExecId\r\n            projectId\r\n            projectName\r\n            projectVersionName\r\n            relDefinitionId\r\n            relName\r\n            relSnapshot\r\n            scheduledTime\r\n            taskId\r\n            taskNotes\r\n            taskStatus\r\n            workflowFolderId\r\n            workflowRequestId\r\n            workflowSubmittedOn\r\n            workflowSubmitter\r\n        }\r\n    }\r\n}\r\n",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Invalid Page",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"No errors in response body\", function () {\r",
+									"    pm.expect(jsonData.errors).to.eql(undefined);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"No items are returned\", function () {\r",
+									"    pm.expect(jsonData.data.reportScheduledTasks.items.length).to.eql(0);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query envState($page: PageInput, $where: [WhereInput], $sort: [SortInput]) {\r\n    reportScheduledTasks(page: $page, where: $where, sort: $sort) {\r\n        next\r\n        hasMore\r\n        items {\r\n            allFilesRequested\r\n            createdOn\r\n            buildFlexField1\r\n            environmentId\r\n            environmentName\r\n            flexField1\r\n            folderRequestFolderId\r\n            folderRequestId\r\n            folderRequestSubmittedOn\r\n            folderRequestSubmitter\r\n            folderVersionName\r\n            gateName\r\n            overrideBy\r\n            overrideOn\r\n            packageName\r\n            pipelineStageExecId\r\n            pipelineStageGateExecId\r\n            projectId\r\n            projectName\r\n            projectVersionName\r\n            relDefinitionId\r\n            relName\r\n            relSnapshot\r\n            scheduledTime\r\n            taskId\r\n            taskNotes\r\n            taskStatus\r\n            workflowFolderId\r\n            workflowRequestId\r\n            workflowSubmittedOn\r\n            workflowSubmitter\r\n        }\r\n    }\r\n}\r\n",
+								"variables": "{\r\n    \"page\": {\r\n        \"limit\": 50,\r\n        \"offset\": 111111111\r\n    }\r\n}"
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Overridden",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"No errors in response body\", function () {\r",
+									"    pm.expect(jsonData.errors).to.eql(undefined);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Items are returned\", function () {\r",
+									"    pm.expect(jsonData.data.reportScheduledTasks.items.length).to.gt(0);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Amount of returned changes matches default\", function () {\r",
+									"    let maxAmount = parseInt(pm.collectionVariables.get(\"DEFAULT_LIMIT\"));\r",
+									"    pm.expect(jsonData.data.reportScheduledTasks.items.length).to.lte(maxAmount);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"All returned scheduled tasks were overridden\", function() {\r",
+									"    pm.expect(jsonData.data.reportScheduledTasks.items[0].overrideOn).to.exist;\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query envState($where: [WhereInput], $sort: [SortInput]) {\r\n    reportScheduledTasks(where: $where, sort: $sort) {\r\n        items {\r\n            allFilesRequested\r\n            createdOn\r\n            buildFlexField1\r\n            environmentId\r\n            environmentName\r\n            flexField1\r\n            folderRequestFolderId\r\n            folderRequestId\r\n            folderRequestSubmittedOn\r\n            folderRequestSubmitter\r\n            folderVersionName\r\n            gateName\r\n            overrideBy\r\n            overrideOn\r\n            packageName\r\n            pipelineStageExecId\r\n            pipelineStageGateExecId\r\n            projectId\r\n            projectName\r\n            projectVersionName\r\n            relDefinitionId\r\n            relName\r\n            relSnapshot\r\n            scheduledTime\r\n            taskId\r\n            taskNotes\r\n            taskStatus\r\n            workflowFolderId\r\n            workflowRequestId\r\n            workflowSubmittedOn\r\n            workflowSubmitter\r\n        }\r\n    }\r\n}\r\n",
+								"variables": "{\r\n    \"where\": [\r\n        {\r\n            \"field\": \"overrideBy\",\r\n            \"type\": \"nempty\"\r\n        }\r\n    ]\r\n}"
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Sort by Date",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"No errors in response body\", function () {\r",
+									"    pm.expect(jsonData.errors).to.eql(undefined);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Items are returned\", function () {\r",
+									"    pm.expect(jsonData.data.reportScheduledTasks.items.length).to.gt(0);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Amount of returned changes matches default\", function () {\r",
+									"    let maxAmount = parseInt(pm.collectionVariables.get(\"DEFAULT_LIMIT\"));\r",
+									"    pm.expect(jsonData.data.reportScheduledTasks.items.length).to.lte(maxAmount);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query envState($where: [WhereInput], $sort: [SortInput]) {\r\n    reportScheduledTasks(where: $where, sort: $sort) {\r\n        next\r\n        hasMore\r\n        items {\r\n            allFilesRequested\r\n            createdOn\r\n            buildFlexField1\r\n            environmentId\r\n            environmentName\r\n            flexField1\r\n            folderRequestFolderId\r\n            folderRequestId\r\n            folderRequestSubmittedOn\r\n            folderRequestSubmitter\r\n            folderVersionName\r\n            gateName\r\n            overrideBy\r\n            overrideOn\r\n            packageName\r\n            pipelineStageExecId\r\n            pipelineStageGateExecId\r\n            projectId\r\n            projectName\r\n            projectVersionName\r\n            relDefinitionId\r\n            relName\r\n            relSnapshot\r\n            scheduledTime\r\n            taskId\r\n            taskNotes\r\n            taskStatus\r\n            workflowFolderId\r\n            workflowRequestId\r\n            workflowSubmittedOn\r\n            workflowSubmitter\r\n        }\r\n    }\r\n}\r\n",
+								"variables": "{\r\n    \"sort\": [\r\n        {\r\n            \"field\": \"createdOn\",\r\n            \"direction\": \"desc\"\r\n        }\r\n    ]\r\n}"
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Environment State Report",
+			"item": [
+				{
+					"name": "Get All",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"No errors in response body\", function () {\r",
+									"    pm.expect(jsonData.errors).to.eql(undefined);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Items are returned\", function () {\r",
+									"    pm.expect(jsonData.data.reportEnvironmentState.items.length).to.gt(0);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Amount of returned changes matches default\", function () {\r",
+									"    let maxAmount = parseInt(pm.collectionVariables.get(\"DEFAULT_LIMIT\"));\r",
+									"    pm.expect(jsonData.data.reportEnvironmentState.items.length).to.eql(maxAmount);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query envState($where: [WhereInput], $sort: [SortInput]) {\r\n    reportEnvironmentState(where: $where, sort: $sort) {\r\n        next\r\n        hasMore\r\n        items {\r\n            allFilesRequested\r\n            buildFlexField1\r\n            buildFlexField10\r\n            buildFlexField2\r\n            buildFlexField3\r\n            buildFlexField4\r\n            buildFlexField5\r\n            buildFlexField6\r\n            buildFlexField7\r\n            buildFlexField8\r\n            buildFlexField9\r\n            endTime\r\n            environmentId\r\n            environmentName\r\n            executionStatus\r\n            externalTicket\r\n            flexField1\r\n            flexField10\r\n            flexField2\r\n            flexField3\r\n            flexField4\r\n            flexField5\r\n            flexField6\r\n            flexField7\r\n            flexField8\r\n            flexField9\r\n            folderId\r\n            folderName\r\n            folderRequestId\r\n            instanceId\r\n            instanceName\r\n            objectPath\r\n            packageName\r\n            partialDeployments\r\n            pipelineStageExecId\r\n            projectId\r\n            projectName\r\n            projectVersionId\r\n            projectVersionName\r\n            projectWorkflowType\r\n            relDefinitionId\r\n            relName\r\n            relSnapshot\r\n            requestedBy\r\n            requestedOn\r\n            scmRevision\r\n            startTime\r\n            streamName\r\n            workflowExecutionId\r\n            workflowRequestId\r\n        }\r\n    }\r\n}\r\n",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Filter by QA Deployments Sort by Project",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"No errors in response body\", function () {\r",
+									"    pm.expect(jsonData.errors).to.eql(undefined);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Items are returned\", function () {\r",
+									"    pm.expect(jsonData.data.reportEnvironmentState.items.length).to.gt(0);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Amount of returned changes matches default\", function () {\r",
+									"    let maxAmount = parseInt(pm.collectionVariables.get(\"DEFAULT_LIMIT\"));\r",
+									"    pm.expect(jsonData.data.reportEnvironmentState.items.length).to.lte(maxAmount);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check only QA deployments are returned\", function () {\r",
+									"    pm.expect(jsonData.data.reportEnvironmentState.items.length).to.eql(jsonData.data.reportEnvironmentState.items.filter(a => a.environmentName == 'QA' && a.projectWorkflowType == 'DEPLOY').length);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query envState($where: [WhereInput], $sort: [SortInput]) {\r\n    reportEnvironmentState(where: $where, sort: $sort) {\r\n        next\r\n        hasMore\r\n        items {\r\n            endTime\r\n            environmentName\r\n            executionStatus\r\n            externalTicket\r\n            folderRequestId\r\n            instanceName\r\n            objectPath\r\n            packageName\r\n            partialDeployments\r\n            projectName\r\n            projectVersionName\r\n            projectWorkflowType\r\n            relName\r\n            relSnapshot\r\n            scmRevision\r\n            startTime\r\n            streamName\r\n            workflowExecutionId\r\n            workflowRequestId\r\n        }\r\n    }\r\n}\r\n",
+								"variables": "{\r\n    \"sort\": [\r\n        {\r\n            \"field\": \"projectName\",\r\n            \"direction\": \"asc\"\r\n        }\r\n    ],\r\n    \"where\": [\r\n        {\r\n            \"field\": \"environmentName\",\r\n            \"type\": \"eqi\",\r\n            \"value\": \"QA\"\r\n        },\r\n        {\r\n            \"field\": \"projectWorkflowType\",\r\n            \"type\": \"eq\",\r\n            \"value\": \"DEPLOY\"\r\n        }\r\n    ]\r\n}"
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All with Limit and Offset",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"No errors in response body\", function () {\r",
+									"    pm.expect(jsonData.errors).to.eql(undefined);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Items are returned\", function () {\r",
+									"    pm.expect(jsonData.data.reportEnvironmentState.items.length).to.gt(0);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Amount of returned items is less than or equal to 75\", function () {\r",
+									"    pm.expect(jsonData.data.reportEnvironmentState.items.length).to.lte(75);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query envState($page: PageInput, $where: [WhereInput], $sort: [SortInput]) {\r\n    reportEnvironmentState(page: $page, where: $where, sort: $sort) {\r\n        next\r\n        hasMore\r\n        items {\r\n            endTime\r\n            environmentName\r\n            executionStatus\r\n            externalTicket\r\n            folderRequestId\r\n            instanceName\r\n            objectPath\r\n            packageName\r\n            partialDeployments\r\n            projectName\r\n            projectVersionName\r\n            projectWorkflowType\r\n            relName\r\n            relSnapshot\r\n            scmRevision\r\n            startTime\r\n            streamName\r\n            workflowExecutionId\r\n            workflowRequestId\r\n        }\r\n    }\r\n}\r\n",
+								"variables": "{\r\n    \"page\": {\r\n        \"limit\": 75,\r\n        \"offset\": 5\r\n    }\r\n}"
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Environment History File Details Report",
+			"item": [
+				{
+					"name": "Get All",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"No errors in response body\", function () {\r",
+									"    pm.expect(jsonData.errors).to.eql(undefined);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Amount of returned changes matches default\", function () {\r",
+									"    let maxAmount = parseInt(pm.collectionVariables.get(\"DEFAULT_LIMIT\"));\r",
+									"    pm.expect(jsonData.data.reportEnvironmentHistoryFileDetails.items.length).to.eqls(maxAmount);\r",
+									"});\r",
+									"\r",
+									" pm.collectionVariables.set(\"environment_history_file\", jsonData.data.reportEnvironmentHistoryFileDetails.items.filter(a => a.objectPath != null)[0].objectPath);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query envState($where: [WhereInput], $sort: [SortInput]) {\r\n    reportEnvironmentHistoryFileDetails(where: $where, sort: $sort) {\r\n        next\r\n        hasMore\r\n        items {\r\n            allFilesRequested\r\n            buildFlexField1\r\n            buildFlexField10\r\n            buildFlexField2\r\n            buildFlexField3\r\n            buildFlexField4\r\n            buildFlexField5\r\n            buildFlexField6\r\n            buildFlexField7\r\n            buildFlexField8\r\n            buildFlexField9\r\n            cmsTicketIds\r\n            endTime\r\n            environmentId\r\n            environmentName\r\n            executionStatus\r\n            flexField1\r\n            flexField10\r\n            flexField2\r\n            flexField3\r\n            flexField4\r\n            flexField5\r\n            flexField6\r\n            flexField7\r\n            flexField8\r\n            flexField9\r\n            folderId\r\n            folderRequestId\r\n            instanceId\r\n            instanceName\r\n            itsTicketIds\r\n            objectPath\r\n            packageName\r\n            partialDeployments\r\n            pkgStatus\r\n            poScmRevision\r\n            projectId\r\n            projectName\r\n            projectVersionName\r\n            relDefinitionId\r\n            relName\r\n            relSnapshot\r\n            relSnapshotId\r\n            requestedBy\r\n            requestedOn\r\n            scmRevision\r\n            sequenceNumber\r\n            stageExecId\r\n            startTime\r\n            streamName\r\n            workflowExecutionId\r\n            workflowId\r\n            workflowRequestId\r\n            workflowType\r\n            workflowVersion\r\n        }\r\n    }\r\n}\r\n",
+								"variables": "{\r\n    \"sort\": [\r\n        {\r\n            \"field\": \"ObjectPath\",\r\n            \"direction\": \"asc\"\r\n        }\r\n    ]\r\n}"
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Sort by Package",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"No errors in response body\", function () {\r",
+									"    pm.expect(jsonData.errors).to.eql(undefined);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Amount of returned changes matches default\", function () {\r",
+									"    let maxAmount = parseInt(pm.collectionVariables.get(\"DEFAULT_LIMIT\"));\r",
+									"    pm.expect(jsonData.data.reportEnvironmentHistoryFileDetails.items.length).to.eqls(maxAmount);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query envState($where: [WhereInput], $sort: [SortInput]) {\r\n    reportEnvironmentHistoryFileDetails(where: $where, sort: $sort) {\r\n        next\r\n        hasMore\r\n        items {\r\n            buildFlexField1\r\n            cmsTicketIds\r\n            endTime\r\n            environmentName\r\n            executionStatus\r\n            flexField1\r\n            instanceName\r\n            itsTicketIds\r\n            objectPath\r\n            packageName\r\n            pkgStatus\r\n            poScmRevision\r\n            projectName\r\n            projectVersionName\r\n            relName\r\n            relSnapshot\r\n            requestedBy\r\n            requestedOn\r\n            scmRevision\r\n            sequenceNumber\r\n            startTime\r\n            streamName\r\n            workflowExecutionId\r\n            workflowRequestId\r\n            workflowType\r\n            workflowVersion\r\n        }\r\n    }\r\n}\r\n",
+								"variables": "{\r\n    \"sort\": [\r\n        {\r\n            \"field\": \"packageName\",\r\n            \"direction\": \"asc\"\r\n        }\r\n    ]\r\n}"
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Filter by File",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"No errors in response body\", function () {\r",
+									"    pm.expect(jsonData.errors).to.eql(undefined);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Items are returned\", function () {\r",
+									"    pm.expect(jsonData.data.reportEnvironmentHistoryFileDetails.items.length).to.gt(0);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Amount of returned changes matches default\", function () {\r",
+									"    let maxAmount = parseInt(pm.collectionVariables.get(\"DEFAULT_LIMIT\"));\r",
+									"    pm.expect(jsonData.data.reportEnvironmentHistoryFileDetails.items.length).to.lte(maxAmount);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Expected file is returned\", function() {\r",
+									"    let path = pm.collectionVariables.get(\"environment_history_file\");\r",
+									"    pm.expect(jsonData.data.reportEnvironmentHistoryFileDetails.items[0].objectPath).to.eql(path);\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query envState($where: [WhereInput], $sort: [SortInput]) {\r\n    reportEnvironmentHistoryFileDetails(where: $where, sort: $sort) {\r\n        next\r\n        hasMore\r\n        items {\r\n            buildFlexField1\r\n            cmsTicketIds\r\n            endTime\r\n            environmentName\r\n            executionStatus\r\n            flexField1\r\n            instanceName\r\n            itsTicketIds\r\n            objectPath\r\n            packageName\r\n            pkgStatus\r\n            poScmRevision\r\n            projectName\r\n            projectVersionName\r\n            relName\r\n            relSnapshot\r\n            requestedBy\r\n            requestedOn\r\n            scmRevision\r\n            sequenceNumber\r\n            startTime\r\n            streamName\r\n            workflowExecutionId\r\n            workflowRequestId\r\n            workflowType\r\n            workflowVersion\r\n        }\r\n    }\r\n}\r\n",
+								"variables": "{\r\n    \"where\": [\r\n        {\r\n            \"field\": \"objectPath\",\r\n            \"type\": \"eqi\",\r\n            \"value\": \"{{environment_history_file}}\"\r\n        }\r\n    ]\r\n}"
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Environment History No File Details Report",
+			"item": [
+				{
+					"name": "Get All",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"No errors in response body\", function () {\r",
+									"    pm.expect(jsonData.errors).to.eql(undefined);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Amount of returned changes matches default\", function () {\r",
+									"    let maxAmount = parseInt(pm.collectionVariables.get(\"DEFAULT_LIMIT\"));\r",
+									"    pm.expect(jsonData.data.reportEnvironmentHistoryNoFileDetails.items.length).to.eqls(maxAmount);\r",
+									"});\r",
+									"\r",
+									" pm.collectionVariables.set(\"release_name\", jsonData.data.reportEnvironmentHistoryNoFileDetails.items.filter(a => a.relName != null)[0].relName);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query envState($where: [WhereInput], $sort: [SortInput]) {\r\n    reportEnvironmentHistoryNoFileDetails(where: $where, sort: $sort) {\r\n        next\r\n        hasMore\r\n        items {\r\n            allFilesRequested\r\n            buildFlexField1\r\n            buildFlexField10\r\n            buildFlexField2\r\n            buildFlexField3\r\n            buildFlexField4\r\n            buildFlexField5\r\n            buildFlexField6\r\n            buildFlexField7\r\n            buildFlexField8\r\n            buildFlexField9\r\n            cmsTicketIds\r\n            endTime\r\n            environmentId\r\n            environmentName\r\n            executionStatus\r\n            flexField1\r\n            flexField10\r\n            flexField2\r\n            flexField3\r\n            flexField4\r\n            flexField5\r\n            flexField6\r\n            flexField7\r\n            flexField8\r\n            flexField9\r\n            folderId\r\n            folderRequestId\r\n            instanceId\r\n            instanceName\r\n            itsTicketIds\r\n            objectPath\r\n            packageName\r\n            partialDeployments\r\n            pkgStatus\r\n            poScmRevision\r\n            projectId\r\n            projectName\r\n            projectVersionName\r\n            relDefinitionId\r\n            relName\r\n            relSnapshot\r\n            relSnapshotId\r\n            requestedBy\r\n            requestedOn\r\n            scmRevision\r\n            sequenceNumber\r\n            stageExecId\r\n            startTime\r\n            streamName\r\n            workflowExecutionId\r\n            workflowId\r\n            workflowRequestId\r\n            workflowType\r\n            workflowVersion\r\n        }\r\n    }\r\n}\r\n",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Sort by Workflow Execution Id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"No errors in response body\", function () {\r",
+									"    pm.expect(jsonData.errors).to.eql(undefined);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Amount of returned changes matches default\", function () {\r",
+									"    let maxAmount = parseInt(pm.collectionVariables.get(\"DEFAULT_LIMIT\"));\r",
+									"    pm.expect(jsonData.data.reportEnvironmentHistoryNoFileDetails.items.length).to.eqls(maxAmount);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Sorting by workflow execution id descending\", function () {\r",
+									"        return jsonData.data.reportEnvironmentHistoryNoFileDetails.items[0].workflowExecutionId > jsonData.data.reportEnvironmentHistoryNoFileDetails.items[1].workflowExecutionId;\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query envState($where: [WhereInput], $sort: [SortInput]) {\r\n    reportEnvironmentHistoryNoFileDetails(where: $where, sort: $sort) {\r\n        next\r\n        hasMore\r\n        items {\r\n            buildFlexField1\r\n            cmsTicketIds\r\n            endTime\r\n            environmentName\r\n            executionStatus\r\n            flexField1\r\n            instanceName\r\n            itsTicketIds\r\n            packageName\r\n            pkgStatus\r\n            projectName\r\n            projectVersionName\r\n            relName\r\n            relSnapshot\r\n            requestedBy\r\n            requestedOn\r\n            scmRevision\r\n            sequenceNumber\r\n            startTime\r\n            streamName\r\n            workflowExecutionId\r\n            workflowId\r\n            workflowRequestId\r\n            workflowType\r\n            workflowVersion\r\n        }\r\n    }\r\n}\r\n",
+								"variables": "{\r\n    \"sort\": [\r\n        {\r\n            \"field\": \"workflowExecutionId\",\r\n            \"direction\": \"desc\"\r\n        }\r\n    ]\r\n}"
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Filter by Release",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"No errors in response body\", function () {\r",
+									"    pm.expect(jsonData.errors).to.eql(undefined);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Amount of returned changes matches default\", function () {\r",
+									"    let maxAmount = parseInt(pm.collectionVariables.get(\"DEFAULT_LIMIT\"));\r",
+									"    pm.expect(jsonData.data.reportEnvironmentHistoryNoFileDetails.items.length).to.lte(maxAmount);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Expected file is returned\", function() {\r",
+									"    let name = pm.collectionVariables.get(\"release_name\");\r",
+									"    pm.expect(jsonData.data.reportEnvironmentHistoryNoFileDetails.items[0].relName).to.eql(name);\r",
+									"})\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query envState($where: [WhereInput], $sort: [SortInput]) {\r\n    reportEnvironmentHistoryNoFileDetails(where: $where, sort: $sort) {\r\n        next\r\n        hasMore\r\n        items {\r\n            buildFlexField1\r\n            cmsTicketIds\r\n            endTime\r\n            environmentName\r\n            executionStatus\r\n            flexField1\r\n            instanceName\r\n            itsTicketIds\r\n            packageName\r\n            pkgStatus\r\n            projectName\r\n            projectVersionName\r\n            relName\r\n            relSnapshot\r\n            requestedBy\r\n            requestedOn\r\n            scmRevision\r\n            sequenceNumber\r\n            startTime\r\n            streamName\r\n            workflowExecutionId\r\n            workflowId\r\n            workflowRequestId\r\n            workflowType\r\n            workflowVersion\r\n        }\r\n    }\r\n}\r\n",
+								"variables": "{\r\n    \"where\": [\r\n        {\r\n            \"field\": \"relName\",\r\n            \"type\": \"eqi\",\r\n            \"value\": \"{{release_name}}\"\r\n        }\r\n    ]\r\n}"
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Environment Discrepancies Report",
+			"item": [
+				{
+					"name": "Get All",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"No errors in response body\", function () {\r",
+									"    pm.expect(jsonData.errors).to.eql(undefined);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Amount of returned changes matches default\", function () {\r",
+									"    let maxAmount = parseInt(pm.collectionVariables.get(\"DEFAULT_LIMIT\"));\r",
+									"    pm.expect(jsonData.data.reportEnvironmentDiscrepancies.items.length).to.lte(maxAmount);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Two environments are returned\", function () {\r",
+									"    pm.expect(jsonData.data.reportEnvironmentDiscrepancies.items[0].environments.length).to.eql(2);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Environment code is as expected\", function () {\r",
+									"    pm.expect(jsonData.data.reportEnvironmentDiscrepancies.items[0].environments[0].environmentCode).to.eql('DEV') || pm.expect(jsonData.data.reportEnvironmentDiscrepancies.items[0].environments[0].environmentCode).to.eql('QA');\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query envState($reportArgs: EnvironmentDiscrepanciesArgumentsInput!, $where: [WhereInput], $sort: [SortInput]) {\r\n    reportEnvironmentDiscrepancies(args: $reportArgs, where: $where, sort: $sort) {\r\n        next\r\n        hasMore\r\n        items {\r\n            environments {\r\n                environmentCode\r\n                scmRevision\r\n                projectVersionName\r\n            }\r\n            instanceName\r\n            objectPath\r\n            projectId\r\n            projectName\r\n        }\r\n    }\r\n}\r\n",
+								"variables": "{\r\n    \"reportArgs\": {\r\n        \"environmentCodes\": [\"DEV\", \"QA\"]\r\n    }\r\n}"
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Filter by Project and Environments",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"No errors in response body\", function () {\r",
+									"    pm.expect(jsonData.errors).to.eql(undefined);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Amount of returned changes matches default\", function () {\r",
+									"    let maxAmount = parseInt(pm.collectionVariables.get(\"DEFAULT_LIMIT\"));\r",
+									"    pm.expect(jsonData.data.reportEnvironmentDiscrepancies.items.length).to.lte(maxAmount);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Two environments are returned\", function () {\r",
+									"    pm.expect(jsonData.data.reportEnvironmentDiscrepancies.items[0].environments.length).to.eql(2);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Environment code is as expected\", function () {\r",
+									"    pm.expect(jsonData.data.reportEnvironmentDiscrepancies.items[0].environments[0].environmentCode).to.eql('DEV') || pm.expect(jsonData.data.reportEnvironmentDiscrepancies.items[0].environments[0].environmentCode).to.eql('QA');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Project matches filter\", function () {\r",
+									"    pm.expect(jsonData.data.reportEnvironmentDiscrepancies.items[0].projectName).to.eql('RESTDeployProject1');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Object path is empty\", function () {\r",
+									"    pm.expect(jsonData.data.reportEnvironmentDiscrepancies.items[0].objectPath).to.eql('N/A');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query envState($reportArgs: EnvironmentDiscrepanciesArgumentsInput!, $where: [WhereInput], $sort: [SortInput]) {\r\n    reportEnvironmentDiscrepancies(args: $reportArgs, where: $where, sort: $sort) {\r\n        next\r\n        hasMore\r\n        items {\r\n            environments {\r\n                environmentCode\r\n                scmRevision\r\n                projectVersionName\r\n            }\r\n            instanceName\r\n            objectPath\r\n            projectId\r\n            projectName\r\n        }\r\n    }\r\n}\r\n",
+								"variables": "{\r\n    \"where\": [\r\n        {\r\n            \"field\": \"projectName\",\r\n            \"type\": \"eq\",\r\n            \"value\": \"RESTDeployProject1\"\r\n        }\r\n    ],\r\n    \"reportArgs\": {\r\n        \"environmentCodes\": [\"DEV\", \"QA\"]\r\n    }\r\n}"
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Filter by Type Different",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"No errors in response body\", function () {\r",
+									"    pm.expect(jsonData.errors).to.eql(undefined);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Amount of returned changes matches default\", function () {\r",
+									"    let maxAmount = parseInt(pm.collectionVariables.get(\"DEFAULT_LIMIT\"));\r",
+									"    pm.expect(jsonData.data.reportEnvironmentDiscrepancies.items.length).to.lte(maxAmount);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Three environments are returned\", function () {\r",
+									"    pm.expect(jsonData.data.reportEnvironmentDiscrepancies.items[0].environments.length).to.eql(3);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query envState($reportArgs: EnvironmentDiscrepanciesArgumentsInput!, $where: [WhereInput], $sort: [SortInput]) {\r\n    reportEnvironmentDiscrepancies(args: $reportArgs, where: $where, sort: $sort) {\r\n        next\r\n        hasMore\r\n        items {\r\n            environments {\r\n                environmentCode\r\n                scmRevision\r\n                projectVersionName\r\n            }\r\n            instanceName\r\n            objectPath\r\n            projectId\r\n            projectName\r\n        }\r\n    }\r\n}\r\n",
+								"variables": "{\r\n    \"reportArgs\": {\r\n        \"environmentCodes\": [\"TEST\", \"QA\", \"DEV\"],\r\n        \"versionFilter\": \"DIFFERENT\"\r\n    }\r\n}"
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get with No Environments Provided",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"Error in response body\", function () {\r",
+									"    pm.expect(jsonData.errors.length).to.gte(1);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query envState($reportArgs: EnvironmentDiscrepanciesArgumentsInput!, $where: [WhereInput], $sort: [SortInput]) {\r\n    reportEnvironmentDiscrepancies(args: $reportArgs, where: $where, sort: $sort) {\r\n        next\r\n        hasMore\r\n        items {\r\n            environments {\r\n                environmentCode\r\n                scmRevision\r\n                projectVersionName\r\n            }\r\n            instanceName\r\n            objectPath\r\n            projectId\r\n            projectName\r\n        }\r\n    }\r\n}\r\n",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "password",
+				"value": "{{PASSWORD}}",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "{{USERNAME}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "USERNAME",
+			"value": "fdadmin"
+		},
+		{
+			"key": "PASSWORD",
+			"value": "welcome1"
+		},
+		{
+			"key": "FLEXDEPLOY_SERVER_HOSTNAME",
+			"value": ""
+		},
+		{
+			"key": "FLEXDEPLOY_SERVER_PORT",
+			"value": ""
+		},
+		{
+			"key": "DEFAULT_LIMIT",
+			"value": "50"
+		},
+		{
+			"key": "environment_history_file",
+			"value": ""
+		},
+		{
+			"key": "release_name",
+			"value": ""
+		}
+	]
+}
