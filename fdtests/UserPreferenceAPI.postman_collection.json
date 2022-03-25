@@ -1,0 +1,668 @@
+{
+	"info": {
+		"_postman_id": "83c6f533-d8f8-4250-9b25-84ebfffde0f5",
+		"name": "UserPreferenceAPI",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "CleanUpBefore",
+			"item": [
+				{
+					"name": "CleanupTestsBefore",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"setTimeout(() => {\r",
+									"    pm.test(\"Status code is 200\", function()\r",
+									"    {\r",
+									"        pm.response.to.have.status(200)\r",
+									"    })\r",
+									"}, 5000);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/fdtestservlet?testclass=flexagon.fd.model2.api.UserPreferenceAPIPostmanCleanupTest",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"fdtestservlet"
+							],
+							"query": [
+								{
+									"key": "testclass",
+									"value": "flexagon.fd.model2.api.UserPreferenceAPIPostmanCleanupTest"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "UserPreferenceGraphQLTests",
+			"item": [
+				{
+					"name": "getUserPreferences (Empty)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"var userPreferenceCount = 0;\r",
+									"var items = jsonData.data.userPreferences.items;\r",
+									"for(var i = 0; i < items.length; i++) {\r",
+									"    var obj = items[i];\r",
+									"    if (obj.fdUserPrefKey.startsWith(\"POSTMAN\")) {\r",
+									"        userPreferenceCount += 1;\r",
+									"    }\r",
+									"}\r",
+									"pm.test(\"Check count\", function () {\r",
+									"    pm.expect(userPreferenceCount).to.eql(0);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query getAllUserPreferences($where: [WhereInput]) {\r\n  userPreferences (where: $where) {\r\n    next\r\n    hasMore\r\n    items {\r\n        createdBy\r\n        createdOn\r\n        fdUserPrefDataType\r\n        fdUserPrefKey\r\n        fdUserPrefValue\r\n        updatedBy\r\n        updatedOn\r\n        userId\r\n        versionNumber\r\n    }\r\n  }\r\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "setUserPreference (Create 1)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"Check fdUserPrefKey\", function () {\r",
+									"    pm.expect(jsonData.data.setUserPreference.fdUserPrefKey).to.eql(\"POSTMAN_fd_use_pref_key_1\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check fdUserPrefValue\", function () {\r",
+									"    pm.expect(jsonData.data.setUserPreference.fdUserPrefValue).to.eql(\"POSTMAN_fd_use_pref_value_1\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check fdUserPrefDataType\", function () {\r",
+									"    pm.expect(jsonData.data.setUserPreference.fdUserPrefDataType).to.eql(\"String\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation {\r\n    setUserPreference(id: \"POSTMAN_fd_use_pref_key_1\", input: {\r\n            fdUserPrefDataType: String\r\n            fdUserPrefValue: \"POSTMAN_fd_use_pref_value_1\"\r\n        }\r\n    ) {\r\n        fdUserPrefDataType\r\n        fdUserPrefKey\r\n        fdUserPrefValue\r\n        userId\r\n    }\r\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "setUserPreference (Create 2)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"Check fdUserPrefKey\", function () {\r",
+									"    pm.expect(jsonData.data.setUserPreference.fdUserPrefKey).to.eql(\"POSTMAN_fd_use_pref_key_2\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check fdUserPrefValue\", function () {\r",
+									"    pm.expect(jsonData.data.setUserPreference.fdUserPrefValue).to.eql(\"POSTMAN_fd_use_pref_value_2\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check fdUserPrefDataType\", function () {\r",
+									"    pm.expect(jsonData.data.setUserPreference.fdUserPrefDataType).to.eql(\"String\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation {\r\n    setUserPreference(id: \"POSTMAN_fd_use_pref_key_2\", input: {\r\n            fdUserPrefDataType: String\r\n            fdUserPrefValue: \"POSTMAN_fd_use_pref_value_2\"\r\n        }\r\n    ) {\r\n        fdUserPrefDataType\r\n        fdUserPrefKey\r\n        fdUserPrefValue\r\n        userId\r\n    }\r\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "setUserPreference (Update String Value)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"Check fdUserPrefKey\", function () {\r",
+									"    pm.expect(jsonData.data.setUserPreference.fdUserPrefKey).to.eql(\"POSTMAN_fd_use_pref_key_1\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check fdUserPrefValue\", function () {\r",
+									"    pm.expect(jsonData.data.setUserPreference.fdUserPrefValue).to.eql(\"String Value\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check fdUserPrefDataType\", function () {\r",
+									"    pm.expect(jsonData.data.setUserPreference.fdUserPrefDataType).to.eql(\"String\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation {\r\n    setUserPreference(id: \"POSTMAN_fd_use_pref_key_1\", input: {\r\n            fdUserPrefDataType: String\r\n            fdUserPrefValue: \"String Value\"\r\n        }\r\n    ) {\r\n        fdUserPrefDataType\r\n        fdUserPrefKey\r\n        fdUserPrefValue\r\n        userId\r\n    }\r\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "setUserPreference (Update Integer Value)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"Check fdUserPrefKey\", function () {\r",
+									"    pm.expect(jsonData.data.setUserPreference.fdUserPrefKey).to.eql(\"POSTMAN_fd_use_pref_key_1\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check fdUserPrefValue\", function () {\r",
+									"    pm.expect(jsonData.data.setUserPreference.fdUserPrefValue).to.eql(\"123\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check fdUserPrefDataType\", function () {\r",
+									"    pm.expect(jsonData.data.setUserPreference.fdUserPrefDataType).to.eql(\"Integer\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation {\r\n    setUserPreference(id: \"POSTMAN_fd_use_pref_key_1\", input: {\r\n            fdUserPrefDataType: Integer\r\n            fdUserPrefValue: \"123\"\r\n        }\r\n    ) {\r\n        fdUserPrefDataType\r\n        fdUserPrefKey\r\n        fdUserPrefValue\r\n        userId\r\n    }\r\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "setUserPreference (Update Double Value)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"Check fdUserPrefKey\", function () {\r",
+									"    pm.expect(jsonData.data.setUserPreference.fdUserPrefKey).to.eql(\"POSTMAN_fd_use_pref_key_1\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check fdUserPrefValue\", function () {\r",
+									"    pm.expect(jsonData.data.setUserPreference.fdUserPrefValue).to.eql(\"123.123\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check fdUserPrefDataType\", function () {\r",
+									"    pm.expect(jsonData.data.setUserPreference.fdUserPrefDataType).to.eql(\"Double\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation {\r\n    setUserPreference(id: \"POSTMAN_fd_use_pref_key_1\", input: {\r\n            fdUserPrefDataType: Double\r\n            fdUserPrefValue: \"123.123\"\r\n        }\r\n    ) {\r\n        fdUserPrefDataType\r\n        fdUserPrefKey\r\n        fdUserPrefValue\r\n        userId\r\n    }\r\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "setUserPreference (Update Boolean Value)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"Check fdUserPrefKey\", function () {\r",
+									"    pm.expect(jsonData.data.setUserPreference.fdUserPrefKey).to.eql(\"POSTMAN_fd_use_pref_key_1\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check fdUserPrefValue\", function () {\r",
+									"    pm.expect(jsonData.data.setUserPreference.fdUserPrefValue).to.eql(\"true\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check fdUserPrefDataType\", function () {\r",
+									"    pm.expect(jsonData.data.setUserPreference.fdUserPrefDataType).to.eql(\"Boolean\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation {\r\n    setUserPreference(id: \"POSTMAN_fd_use_pref_key_1\", input: {\r\n            fdUserPrefDataType: Boolean\r\n            fdUserPrefValue: \"true\"\r\n        }\r\n    ) {\r\n        fdUserPrefDataType\r\n        fdUserPrefKey\r\n        fdUserPrefValue\r\n        userId\r\n    }\r\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "setUserPreference (Update Object Value)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"Check fdUserPrefKey\", function () {\r",
+									"    pm.expect(jsonData.data.setUserPreference.fdUserPrefKey).to.eql(\"POSTMAN_fd_use_pref_key_1\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check fdUserPrefValue\", function () {\r",
+									"    pm.expect(jsonData.data.setUserPreference.fdUserPrefValue).to.eql(\"{ 'key1': 'value1', 'key2': 'value2' }\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check fdUserPrefDataType\", function () {\r",
+									"    pm.expect(jsonData.data.setUserPreference.fdUserPrefDataType).to.eql(\"Object\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation {\r\n    setUserPreference(id: \"POSTMAN_fd_use_pref_key_1\", input: {\r\n            fdUserPrefDataType: Object\r\n            fdUserPrefValue: \"{ 'key1': 'value1', 'key2': 'value2' }\"\r\n        }\r\n    ) {\r\n        fdUserPrefDataType\r\n        fdUserPrefKey\r\n        fdUserPrefValue\r\n        userId\r\n    }\r\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getUserPreferences",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"var userPreferenceCount = 0;\r",
+									"var items = jsonData.data.userPreferences.items;\r",
+									"for(var i = 0; i < items.length; i++) {\r",
+									"    var obj = items[i];\r",
+									"    if (obj.fdUserPrefKey.startsWith(\"POSTMAN\")) {\r",
+									"        userPreferenceCount += 1;\r",
+									"    }\r",
+									"}\r",
+									"pm.test(\"Check count\", function () {\r",
+									"    pm.expect(userPreferenceCount).to.eql(2);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query getAllUserPreferences($where: [WhereInput]) {\r\n  userPreferences (where: $where) {\r\n    next\r\n    hasMore\r\n    items {\r\n        createdBy\r\n        createdOn\r\n        fdUserPrefDataType\r\n        fdUserPrefKey\r\n        fdUserPrefValue\r\n        updatedBy\r\n        updatedOn\r\n        userId\r\n        versionNumber\r\n    }\r\n  }\r\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "CleanUpAfter",
+			"item": [
+				{
+					"name": "CleanupTestsAfter",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"setTimeout(() => {\r",
+									"    pm.test(\"Status code is 200\", function()\r",
+									"    {\r",
+									"        pm.response.to.have.status(200)\r",
+									"    })\r",
+									"}, 5000);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/fdtestservlet?testclass=flexagon.fd.model2.api.UserPreferenceAPIPostmanCleanupTest",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"fdtestservlet"
+							],
+							"query": [
+								{
+									"key": "testclass",
+									"value": "flexagon.fd.model2.api.UserPreferenceAPIPostmanCleanupTest"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "password",
+				"value": "{{ADMIN_PASSWORD}}",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "{{ADMIN_USERNAME}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "fdadminUserId",
+			"value": ""
+		},
+		{
+			"key": "noPermissionsUserId",
+			"value": ""
+		}
+	]
+}
