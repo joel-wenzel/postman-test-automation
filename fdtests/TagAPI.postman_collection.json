@@ -1,0 +1,613 @@
+{
+	"info": {
+		"_postman_id": "7ea648a0-5f60-40a5-9baa-b12876e5017b",
+		"name": "TagAPI",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Setup",
+			"item": [
+				{
+					"name": "FindAndDeleteExistingTags",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"var arr = jsonData.data.tags.items;\r",
+									"\r",
+									"host = pm.environment.get(\"FLEXDEPLOY_SERVER_HOSTNAME\");\r",
+									"port = pm.environment.get(\"FLEXDEPLOY_SERVER_PORT\");\r",
+									"\r",
+									"for (let i = 0; i < arr.length; i++) {\r",
+									"    var tagObject = arr[i];\r",
+									"    var tagId = tagObject['tagId'];\r",
+									"console.log('tagId=' + tagId);\r",
+									"    if (tagId) {\r",
+									"        pm.sendRequest({\r",
+									"            url: 'http://' + host + ':' + port + '/flexdeploy/rest/v2/graphql',\r",
+									"            method: 'POST',\r",
+									"            header: {\r",
+									"                'Accept': '*/*',\r",
+									"                'Content-Type': 'application/json',\r",
+									"                'Authorization': request.headers[\"authorization\"]\r",
+									"            },\r",
+									"            body: JSON.stringify({\r",
+									"                query: 'mutation {deleteTag(id: ' + tagId + ') }'\r",
+									"            })\r",
+									"        }, function (err, res) {\r",
+									"            console.log(res);\r",
+									"        });\r",
+									"    }\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{ADMIN_PASSWORD}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{ADMIN_USERNAME}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query tags ($where: [WhereInput]) {\r\n    tags (where: $where) {\r\n        items {\r\n            tagId\r\n        }\r\n    }\r\n}",
+								"variables": "{\r\n  \"where\": {\r\n    \"field\": \"tagKey\",\r\n    \"type\": \"inc\",\r\n    \"value\": \"Postman tagkey Test 1\"\r\n  }\r\n}"
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Graphql Tests",
+			"item": [
+				{
+					"name": "createTag",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"var TagData = jsonData.data.createTag;\r",
+									"pm.collectionVariables.set(\"tagId\", TagData['tagId']);\r",
+									"\r",
+									"pm.test(\"Check TagKey is correct\", function () {\r",
+									"    pm.expect(TagData.tagKey).to.eql(\"Postman tagkey Test 1\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check TagStyle is correct\", function () {\r",
+									"    pm.expect(TagData.tagStyle).to.eql(\"00ff00\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check tagKey versionNumber is 1\", function () {\r",
+									"    pm.expect(TagData.versionNumber).to.eql(1);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check createdBy is correct\", function () {\r",
+									"    pm.expect(TagData.createdBy).to.eql(pm.environment.get(\"ADMIN_USERNAME\"));\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check updatedBy is correct\", function () {\r",
+									"    pm.expect(TagData.updatedBy).to.eql(pm.environment.get(\"ADMIN_USERNAME\"));\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{ADMIN_PASSWORD}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{ADMIN_USERNAME}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation createTag ($input: TagDataObjectInput!) {\n    createTag (input: $input) {\n        createdBy\n        createdOn\n        tagId\n        tagKey\n        tagStyle\n        updatedBy\n        updatedOn\n        versionNumber\n    }\n}",
+								"variables": "{\n  \"input\": {\n    \"tagKey\": \"Postman tagkey Test 1\",\n    \"tagStyle\": \"00ff00\",\n    \"versionNumber\": 1\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "patchTag",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.test(\"Check tag stype changed\", function () {\r",
+									"    pm.expect(jsonData.data.patchTag.tagStyle).to.eql(\"00ff0022\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check tag versionNumber is 2\", function () {\r",
+									"    pm.expect(jsonData.data.patchTag.versionNumber).to.eql(2);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var tagId = pm.collectionVariables.get(\"tagId\");\r",
+									"\r",
+									"if (tagId == undefined || tagId == null) {\r",
+									"    throw new Error(\"Tag Id is not valid\")\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{ADMIN_PASSWORD}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{ADMIN_USERNAME}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation patchTag ($id: Long!, $input: TagDataObjectPatchInput!) {\n    patchTag (id: $id, input: $input) {\n        createdBy\n        createdOn\n        tagId\n        tagKey\n        tagStyle\n        updatedBy\n        updatedOn\n        versionNumber\n    }\n}",
+								"variables": "{\n  \"id\": {{tagId}},\n  \"input\": {\n    \"tagStyle\": \"00ff0022\"\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateTag",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Check tagkey is not modified\", function () {\r",
+									"    pm.expect(jsonData.data.updateTag.tagKey).to.eql(\"Postman tagkey Test 1\");\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Check tag stype changed\", function () {\r",
+									"    pm.expect(jsonData.data.updateTag.tagStyle).to.eql(\"00ff0033\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check tag versionNumber is 3\", function () {\r",
+									"    pm.expect(jsonData.data.updateTag.versionNumber).to.eql(3);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var tagId = pm.collectionVariables.get(\"tagId\");\r",
+									"\r",
+									"if (tagId == undefined || tagId == null) {\r",
+									"    throw new Error(\"Tag Id is not valid\")\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{ADMIN_PASSWORD}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{ADMIN_USERNAME}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation updateTag ($id: Long!, $input: TagDataObjectInput!) {\n    updateTag (id: $id, input: $input) {\n        createdBy\n        createdOn\n        tagId\n        tagKey\n        tagStyle\n        updatedBy\n        updatedOn\n        versionNumber\n    }\n}",
+								"variables": "{\n  \"id\": {{tagId}},\n  \"input\": {\n   \"tagKey\": \"modifed key\",\n   \"tagStyle\": \"00ff0033\"\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "tagById",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"var TagData = jsonData.data.tagById;\r",
+									"\r",
+									"pm.test(\"Check TagKey is correct\", function () {\r",
+									"    pm.expect(TagData.tagKey).to.eql(\"Postman tagkey Test 1\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var tagId = pm.collectionVariables.get(\"tagId\");\r",
+									"\r",
+									"if (tagId == undefined || tagId == null) {\r",
+									"    throw new Error(\"Tag Id is not valid\")\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{ADMIN_PASSWORD}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{ADMIN_USERNAME}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query tagById ($id: Long!) {\n    tagById (id: $id) {\n        createdBy\n        createdOn\n        tagId\n        tagKey\n        tagStyle\n        updatedBy\n        updatedOn\n        versionNumber\n    }\n}",
+								"variables": "{\n  \"id\": \"{{tagId}}\"\n}"
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteTag",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var tagId = pm.collectionVariables.get(\"tagId\");\r",
+									"\r",
+									"if (tagId == undefined || tagId == null) {\r",
+									"    throw new Error(\"Tag Id is not valid\")\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{ADMIN_PASSWORD}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{ADMIN_USERNAME}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation deleteTag ($id: Long!) {\n    deleteTag (id: $id)\n}",
+								"variables": "{\n  \"id\": {{tagId}}\n}"
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Teardown",
+			"item": [
+				{
+					"name": "FindAndDeleteExistingTags",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"var arr = jsonData.data.tags.items;\r",
+									"\r",
+									"host = pm.environment.get(\"FLEXDEPLOY_SERVER_HOSTNAME\");\r",
+									"port = pm.environment.get(\"FLEXDEPLOY_SERVER_PORT\");\r",
+									"\r",
+									"for (let i = 0; i < arr.length; i++) {\r",
+									"    var tagObject = arr[i];\r",
+									"    var tagId = tagObject['tagId'];\r",
+									"console.log('tagId=' + tagId);\r",
+									"    if (tagId) {\r",
+									"        pm.sendRequest({\r",
+									"            url: 'http://' + host + ':' + port + '/flexdeploy/rest/v2/graphql',\r",
+									"            method: 'POST',\r",
+									"            header: {\r",
+									"                'Accept': '*/*',\r",
+									"                'Content-Type': 'application/json',\r",
+									"                'Authorization': request.headers[\"authorization\"]\r",
+									"            },\r",
+									"            body: JSON.stringify({\r",
+									"                query: 'mutation {deleteTag(id: ' + tagId + ') }'\r",
+									"            })\r",
+									"        }, function (err, res) {\r",
+									"            console.log(res);\r",
+									"        });\r",
+									"    }\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{ADMIN_PASSWORD}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{ADMIN_USERNAME}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query tags ($where: [WhereInput]) {\r\n    tags (where: $where) {\r\n        items {\r\n            tagId\r\n        }\r\n    }\r\n}",
+								"variables": "{\r\n  \"where\": {\r\n    \"field\": \"tagKey\",\r\n    \"type\": \"inc\",\r\n    \"value\": \"Postman tagkey Test 1\"\r\n  }\r\n}"
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "tagId",
+			"value": ""
+		}
+	]
+}
