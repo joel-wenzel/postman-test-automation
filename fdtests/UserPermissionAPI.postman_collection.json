@@ -1,0 +1,582 @@
+{
+	"info": {
+		"_postman_id": "3cd41070-728e-44f3-91ea-cd3ff3caa67c",
+		"name": "UserPermissionAPI",
+		"description": "TestSuite for SavedQueryAPI.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Setup",
+			"item": [
+				{
+					"name": "CleanupTests",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"setTimeout(() => \r",
+									"{\r",
+									"    pm.test(\"Status code is 200\", function () \r",
+									"    {\r",
+									"        pm.response.to.have.status(200)\r",
+									"    })\r",
+									"}, 10000);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{ADMIN_PASSWORD}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{ADMIN_USERNAME}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/fdtestservlet?testclass=flexagon.fd.model2.api.FolderAndProjectSecurityPermissionAPIPostmanCleanupTest",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"fdtestservlet"
+							],
+							"query": [
+								{
+									"key": "testclass",
+									"value": "flexagon.fd.model2.api.FolderAndProjectSecurityPermissionAPIPostmanCleanupTest"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Delete testing objects if they already exist\r\nInsert testing object",
+			"auth": {
+				"type": "basic",
+				"basic": [
+					{
+						"key": "password",
+						"value": "{{PASSWORD}}",
+						"type": "string"
+					},
+					{
+						"key": "username",
+						"value": "{{USERNAME}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Tests",
+			"item": [
+				{
+					"name": "CreateFolder",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"var folderObject = jsonData.data.createFolder;\r",
+									"pm.collectionVariables.set(\"parentfolderId\", folderObject['folderId']);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{ADMIN_PASSWORD}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{ADMIN_USERNAME}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation {\r\n    createFolder(input: {\r\n        folderName: \"POSTMAN Folder Project Trigger Test\",\r\n        parentFolderId: 99,\r\n        securityOverridden: true\r\n    }) {\r\n        folderId\r\n    }\r\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CreateFolder",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"var folderObject = jsonData.data.createFolder;\r",
+									"pm.collectionVariables.set(\"folderId\", folderObject['folderId']);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{ADMIN_PASSWORD}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{ADMIN_USERNAME}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation {\r\n    createFolder(input: {\r\n        folderName: \"POSTMAN Folder2 Project Trigger Test\",\r\n        parentFolderId: {{parentfolderId}},\r\n        securityOverridden: true\r\n    }) {\r\n        folderId\r\n    }\r\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CreateProject",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"var projectObject = jsonData.data.createProject;\r",
+									"pm.collectionVariables.set(\"projectId\", projectObject['projectId']);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{ADMIN_PASSWORD}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{ADMIN_USERNAME}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation {\r\n    createProject(input: {\r\n        projectName: \"POSTMAN Project Project Trigger Test\",\r\n        scmType: NONE,\r\n        folderId: {{folderId}},\r\n        securityOverridden: true\r\n\r\n    }) {\r\n        projectId\r\n    }\r\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getPermissionsProject",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{ADMIN_USERNAME}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "{{ADMIN_PASSWORD}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query {\r\n  userPermissions(objectType: PROJECT, objectId: {{projectId}})\r\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getPermissionsFolder",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{ADMIN_USERNAME}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "{{ADMIN_PASSWORD}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query {\r\n  userPermissions(objectType: FOLDER, objectId: {{folderId}})\r\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/rest/v2/graphql",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"rest",
+								"v2",
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "TearDown",
+			"item": [
+				{
+					"name": "CleanupTests",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"setTimeout(() => \r",
+									"{\r",
+									"    pm.test(\"Status code is 200\", function () \r",
+									"    {\r",
+									"        pm.response.to.have.status(200)\r",
+									"    })\r",
+									"}, 10000);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{ADMIN_PASSWORD}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{ADMIN_USERNAME}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{FLEXDEPLOY_SERVER_HOSTNAME}}:{{FLEXDEPLOY_SERVER_PORT}}/flexdeploy/fdtestservlet?testclass=flexagon.fd.model2.api.FolderAndProjectSecurityPermissionAPIPostmanCleanupTest",
+							"protocol": "http",
+							"host": [
+								"{{FLEXDEPLOY_SERVER_HOSTNAME}}"
+							],
+							"port": "{{FLEXDEPLOY_SERVER_PORT}}",
+							"path": [
+								"flexdeploy",
+								"fdtestservlet"
+							],
+							"query": [
+								{
+									"key": "testclass",
+									"value": "flexagon.fd.model2.api.FolderAndProjectSecurityPermissionAPIPostmanCleanupTest"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Delete testing objects if already exist",
+			"auth": {
+				"type": "basic",
+				"basic": [
+					{
+						"key": "password",
+						"value": "{{PASSWORD}}",
+						"type": "string"
+					},
+					{
+						"key": "username",
+						"value": "{{USERNAME}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "password",
+				"value": "{{PASSWORD}}",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "{{USERNAME}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "folderId",
+			"value": ""
+		},
+		{
+			"key": "projectId",
+			"value": ""
+		},
+		{
+			"key": "parentfolderId",
+			"value": ""
+		},
+		{
+			"key": "groupId",
+			"value": ""
+		}
+	]
+}
