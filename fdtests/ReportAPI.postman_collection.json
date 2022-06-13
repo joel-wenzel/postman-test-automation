@@ -19,6 +19,7 @@
 									"    pm.response.to.have.status(300);\r",
 									"});\r",
 									"\r",
+									"",
 									"var jsonData = pm.response.json();\r",
 									"pm.test(\"No errors in response body\", function () {\r",
 									"    pm.expect(jsonData.errors).to.eql(undefined);\r",
