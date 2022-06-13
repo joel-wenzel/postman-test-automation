@@ -19,6 +19,8 @@
 									"    pm.response.to.have.status(200);\r",
 									"});\r",
 									"\r",
+									"",
+									"",
 									"var jsonData = pm.response.json();\r",
 									"var arr = jsonData.data.fdRealms.items;\r",
 									"\r",
