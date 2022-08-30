@@ -1,0 +1,27 @@
+# to get started type 'test-' and select the template you want to use
+---
+
+testName: Postman Test
+description: Generated Postman Test
+# # Optionally apply filters to control when this test executes
+# # The filter below would only execute this test if the deploy target environment code is DEV 
+# filters: 
+#  - type: env
+#    value: DEV
+workflow:
+  name: Postman-runCollection
+  inputs:
+    # regex expression to match all collection.json files in fdtests folder of the execution
+    - code: FDPMN_COLLECTION_FILE
+      value: .*collection.json
+    # the test instance code you want to execute on
+    - code: TEST_INSTANCE   
+      value: POSTJOELMAN
+    - code: FDPMN_ENVIRONMENT_FILE
+      value: fdtests/postman_environment_TOMCATPOSTGRES.json
+    - code: FDPMN_MISC_CMD_OPTIONS
+      value: ""
+    - code: FDPMN_TEST_ITERATIONS
+      value: ""
+    - code: FOLDERNAME_IN_COLLECTION
+      value: ""
